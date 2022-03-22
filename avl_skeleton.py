@@ -298,8 +298,23 @@ class AVLTreeList(object):
 			return n
 		else:
 			n = node
-			while n.getParent.getLeft == n: ##Compexity O(logn)
+			while n.getParent.getLeft != n: ##Compexity O(logn)
 				n = n.getParent
 			return n
+
+	def Predecessor(self, node):
+		if node == self.min:
+			return None
+		n = node.getLeft
+		if node.getLeft != None:
+			while n.getRight != None:  ##Compexity O(logn)
+				n=n.getRight
+			return n
+		else:
+			n = node
+			while n.getParent.getRight != n:  ##Compexity O(logn)
+				n = n.getParent
+			return n
+
 
 
