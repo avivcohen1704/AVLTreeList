@@ -4,12 +4,11 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-#elad <3 aviv
 
 """A class represnting a node in an AVL tree"""
 
 class AVLNode(object):
-	"""Constructor, you are allowed to add more fields. 
+	"""Constructor, you are allowed to add more fields.
 
 	@type value: str
 	@param value: data of your node
@@ -20,7 +19,8 @@ class AVLNode(object):
 		self.right = None
 		self.parent = None
 		self.height = -1
-		
+		self.size = 0
+
 
 	"""returns the left child
 	@rtype: AVLNode
@@ -28,8 +28,6 @@ class AVLNode(object):
 	"""
 	def getLeft(self):
 		return self.left
-
-
 
 	"""returns the right child
 
@@ -118,6 +116,19 @@ class AVLNode(object):
 			return False
 		return True
 
+	"""return the size of the node
+	
+	@rtype: int
+	@returns: the size of the node, None if virtual
+	"""
+	def getSize(self):
+		if self.isRealNode():
+			return self.size
+		else:
+			return 0
+
+
+
 
 
 """
@@ -131,18 +142,18 @@ class AVLTreeList(object):
 
 	"""
 	def __init__(self):
-		self.root = None
-		self.min = None ## both min & max are fields for first & last
+		self.root = AVLNode() ## represents the virtual node for this specific tree
+		self.min = None       ## both min & max are fields for first & last
 		self.max = None
-		self.size = 0
+
 
 	"""returns whether the list is empty
 
 	@rtype: bool
 	@returns: True if the list is empty, False otherwise
 	"""
-	def empty(self):
-		if self.root == None:
+	def empty(self): ##Supposed to be Done
+		if self.root.getHeight == -1:
 			return True
 		return False
 
@@ -156,14 +167,27 @@ class AVLTreeList(object):
 	@rtype: str
 	@returns: the the value of the i'th item in the list
 	"""
-	def retrieve(self, i):  ##DNF
-		return self.retrieveEnv(self.min, i)
-
-	def retrieveEnv(self, node ,i): ##DNF
-		if i==0:
-			return node
-		if node.left != None:
+	def retrieve(self, i):  ##Supposed to be finished
+		if 0 > i or i > self.length():   ##list index out of range
 			return None
+
+		node = self.getRoot()
+
+		cnt = 0
+		while i > 1:                                        ## complexity O(logn) the height of the tree
+			cnt += 1
+			if cnt == node.getSize + 10:
+				return "retrieve while-loop didnt stopped"   ##Retrieve check 1
+
+			elif i < node.getLeft.getSize:
+				node = node.getLeft
+			elif i > node.getLeft.getSize:
+				i = i - 1 - node.getLeft.getSize
+				node = node.getRight
+			elif i == node.getLeft.getSize:
+				return node
+
+		return "retrieve didnt work!!"                       ##Retrieve check 2
 
 
 	"""inserts val at position i in the list
@@ -176,13 +200,58 @@ class AVLTreeList(object):
 	@rtype: list
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def insert(self, i, val): ## DNF & first two are basics
-		if i >= self.size:
-			return
-		self.size += 1
+	def insert(self, i, val): ## DNF, the insertion is ready, the rotating isn't, and the fields are not ready
+
+		if i >= self.length() or i < 0:     ## list index out of range
+			return 0
+
+		newNode = AVLNode(val)  ## creates the new node that is going to be inserted
+
+		if self.empty():        ## insert the first node to the tree
+			virtualNode = self.root
+			self.root = newNode
+			self.min = newNode
+			self.max = newNode
+
+			newNode.setParent(virtualNode)
+			newNode.setLeft(virtualNode)
+			newNode.setRight(virtualNode)
+			newNode.setHeight(0)
+			newNode.size = 1
+
+			return 0
+
+		if i == self.length() or i == 1:    ## coplexcity O(1)
+			if i == self.length():			## places newNode at the end of the list
+				self.max.setRight(newNode)
+				newNode.setParent(self.max)
+				self.max = newNode
+
+			elif i == 1:
+				self.min.setLeft(newNode)   ## places newNode at the start of the list
+				newNode.setParent(self.min)
+				self.min = newNode
+
+		else:
+			oldNode = self.retrieve(i)  ## retrieves the i'th node - that is going to be replace, retrieve comlexity == O(logn)
+
+			if oldNode.getLeft().getHeight == -1:
+				oldNode.setLeft(newNode)
+				newNode.setParent(oldNode)
+
+			else:
+				oldNodePre = self.Predecessor(oldNode)  ## finds the Predecessor of oldNode, complexity O(logn)
+				oldNodePre.setRight(newNode)
+				newNode.setParent(oldNodePre)
 
 
-		return
+		rotateCnt = 0
+		"""here the tree will be the check if the tree needs to rotate, and if, will rotate (DNF coding rotating)
+		
+		afterwards we will compute all of the  fields"""
+
+
+		return rotateCnt
 
 
 	"""deletes the i'th item in the list
@@ -193,8 +262,8 @@ class AVLTreeList(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def delete(self, i): ## DNF & first two are basics
-		if i > self.size:
+	def delete(self, i): ## DNF & first is basic
+		if i > self.length():
 			return
 
 		return -1
@@ -221,11 +290,11 @@ class AVLTreeList(object):
 	@rtype: list
 	@returns: a list of strings representing the data structure
 	"""
-	def listToArray(self):
+	def listToArray(self):  ##Supposed to be finished
 		Array = []
 		node = self.min
 		i = 1
-		while i <= self.size:
+		while i <= self.length():
 			Array.append(node.getValue)
 			node = node.Succesor
 			i +=1
@@ -237,8 +306,8 @@ class AVLTreeList(object):
 	@rtype: int
 	@returns: the size of the list
 	"""
-	def length(self):
-		return self.size
+	def length(self):  ## supposed to be finished
+		return self.root.getSize()
 
 	"""splits the list at the i'th index
 
@@ -269,13 +338,11 @@ class AVLTreeList(object):
 	@rtype: int
 	@returns: the first index that contains val, -1 if not found.
 	"""
-	def search(self, val):
+	def search(self, val):  ## supposed to be Done
 		node = self.min
 		while node.getValue != val:
 			node = node.Succesor
 		return node
-
-
 
 
 
@@ -285,7 +352,9 @@ class AVLTreeList(object):
 	@returns: the root, None if the list is empty
 	"""
 	def getRoot(self):
-		return None
+		if self.root.height == -1:
+			return None
+		return self.root
 
 
 	def Succesor(self, node):
