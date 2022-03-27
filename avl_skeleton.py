@@ -4,6 +4,7 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
+## update time == 27/3 1800
 
 """A class represnting a node in an AVL tree"""
 
@@ -18,15 +19,12 @@ class AVLNode(object):
 		self.left = None
 		self.right = None
 		self.parent = None
-		self.height = -1
-		self.size = 0
+		self.height = 0
+		self.size = 1
 
-	def insertInit(self):
-		newNode.setParent(self.vitrualNode)
-		newNode.setLeft(self.vitrualNode)
-		newNode.setRight(self.vitrualNode)
-		newNode.size = 1
-		newNode.setHeight(0)
+	def virtualInit(self):    ## init of the node to be inserted into the tree
+		newNode.size = 0
+		newNode.setHeight(-1)
 
 
 
@@ -151,9 +149,13 @@ class AVLTreeList(object):
 	"""
 	def __init__(self):
 		virtualNode = AVLNode("") ## represents the virtual node for this specific tree
-		virtualNode.size = 0
+		virtualNode.virtualInit()
 		self.vitrualNode = virtualNode
-		self.root = virtualNode
+		root = self.root
+		root = virtualNode
+		root.setLeft(virtualNode)
+		root.setRight(virtualNode)
+		root.setParent(virtualNode)
 		self.min = virtualNode     ## both min & max are fields for first & last
 		self.max = virtualNode
 
