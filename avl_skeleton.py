@@ -21,6 +21,14 @@ class AVLNode(object):
 		self.height = -1
 		self.size = 0
 
+	def insertInit(self):
+		newNode.setParent(self.vitrualNode)
+		newNode.setLeft(self.vitrualNode)
+		newNode.setRight(self.vitrualNode)
+		newNode.size = 1
+		newNode.setHeight(0)
+
+
 
 	"""returns the left child
 	@rtype: AVLNode
@@ -51,7 +59,7 @@ class AVLNode(object):
 	@returns: the value of self, None if the node is virtual
 	"""
 	def getValue(self):
-		return self.getValue()
+		return self.value
 
 	"""returns the height
 
@@ -142,9 +150,12 @@ class AVLTreeList(object):
 
 	"""
 	def __init__(self):
-		self.root = AVLNode() ## represents the virtual node for this specific tree
-		self.min = None       ## both min & max are fields for first & last
-		self.max = None
+		virtualNode = AVLNode("") ## represents the virtual node for this specific tree
+		virtualNode.size = 0
+		self.vitrualNode = virtualNode
+		self.root = virtualNode
+		self.min = virtualNode     ## both min & max are fields for first & last
+		self.max = virtualNode
 
 
 	"""returns whether the list is empty
@@ -172,19 +183,20 @@ class AVLTreeList(object):
 			return None
 
 		node = self.getRoot()
-
+		len = self.length()
 		cnt = 0
-		while i > 1:                                        ## complexity O(logn) the height of the tree
+		while i >= 0:                                        ## complexity O(logn) the height of the tree
 			cnt += 1
-			if cnt == node.getSize + 10:
+
+			if cnt == len + 10:
 				return "retrieve while-loop didnt stopped"   ##Retrieve check 1
 
-			elif i < node.getLeft.getSize:
+			elif i < node.getLeft().getSize():
 				node = node.getLeft
-			elif i > node.getLeft.getSize:
-				i = i - 1 - node.getLeft.getSize
-				node = node.getRight
-			elif i == node.getLeft.getSize:
+			elif i > node.getLeft().getSize():
+				i = i - 1 - node.getLeft().getSize()
+				node = node.getRight()
+			elif i == node.getLeft().getSize():
 				return node
 
 		return "retrieve didnt work!!"                       ##Retrieve check 2
@@ -202,32 +214,30 @@ class AVLTreeList(object):
 	"""
 	def insert(self, i, val): ## DNF, the insertion is ready, the rotating isn't, and the fields are not ready
 
-		if i >= self.length() or i < 0:     ## list index out of range
-			return 0
 
-		newNode = AVLNode(val)  ## creates the new node that is going to be inserted
+		newNode = AVLNode(val)  ## creates the new node that is going to be inserted & init the new node stats
+		newNode.setParent(self.vitrualNode)
+		newNode.setLeft(self.vitrualNode)
+		newNode.setRight(self.vitrualNode)
+		newNode.size = 1
+		newNode.setHeight(0)
 
-		if self.empty():        ## insert the first node to the tree
-			virtualNode = self.root
+
+		if self.getRoot() == None:        ## insert the first node to the tree
 			self.root = newNode
 			self.min = newNode
 			self.max = newNode
 
-			newNode.setParent(virtualNode)
-			newNode.setLeft(virtualNode)
-			newNode.setRight(virtualNode)
-			newNode.setHeight(0)
-			newNode.size = 1
-
 			return 0
 
-		if i == self.length() or i == 1:    ## coplexcity O(1)
+		if i == self.length() or i ==0:   ## coplexcity O(1)
 			if i == self.length():			## places newNode at the end of the list
 				self.max.setRight(newNode)
 				newNode.setParent(self.max)
 				self.max = newNode
 
-			elif i == 1:
+
+			elif i == 0:
 				self.min.setLeft(newNode)   ## places newNode at the start of the list
 				newNode.setParent(self.min)
 				self.min = newNode
@@ -250,7 +260,10 @@ class AVLTreeList(object):
 		
 		afterwards we will compute all of the  fields"""
 
-
+		node = newNode
+		while node.parent.getHeight() != -1:     ## computes the new size of all nodes from the new node to the root complexity O(logn)
+			node = node.parent
+			node.size = node.getLeft().getSize() + 1 + node.getRight().getSize()
 		return rotateCnt
 
 
@@ -307,7 +320,7 @@ class AVLTreeList(object):
 	@returns: the size of the list
 	"""
 	def length(self):  ## supposed to be finished
-		return self.root.getSize()
+		return self.getRoot().getSize()
 
 	"""splits the list at the i'th index
 
@@ -386,4 +399,10 @@ class AVLTreeList(object):
 			return n
 
 
-
+"""TESTER"""
+tree = AVLTreeList()
+list = ["a","b","c","d"]
+for i in range(len(list)):
+	tree.insert(i,list[i])
+for i in range(len(list)):
+	print(tree.retrieve(i).getValue())
