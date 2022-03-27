@@ -23,8 +23,8 @@ class AVLNode(object):
 		self.size = 1
 
 	def virtualInit(self):    ## init of the node to be inserted into the tree
-		newNode.size = 0
-		newNode.setHeight(-1)
+		self.size = 0
+		self.setHeight(-1)
 
 
 
@@ -149,15 +149,15 @@ class AVLTreeList(object):
 	"""
 	def __init__(self):
 		virtualNode = AVLNode("") ## represents the virtual node for this specific tree
-		virtualNode.virtualInit()
-		self.vitrualNode = virtualNode
-		root = self.root
-		root = virtualNode
-		root.setLeft(virtualNode)
-		root.setRight(virtualNode)
-		root.setParent(virtualNode)
-		self.min = virtualNode     ## both min & max are fields for first & last
-		self.max = virtualNode
+		virtualNode.virtualInit()         ## sets the virtual node to height -1 & size 0
+		self.virtualNode = virtualNode    ## a field that represets a virtual node & can be used from all classes
+		self.root = virtualNode           ## from here to ** set all roots pointers to VNode
+		self.root.setLeft(virtualNode)
+		self.root.setRight(virtualNode)
+		self.root.setParent(virtualNode)   ## **
+		self.min = self.root     ##  both min & max points at the root
+		self.max = self.root
+
 
 
 	"""returns whether the list is empty
@@ -181,8 +181,6 @@ class AVLTreeList(object):
 	@returns: the the value of the i'th item in the list
 	"""
 	def retrieve(self, i):  ##Supposed to be finished
-		if 0 > i or i > self.length():   ##list index out of range
-			return None
 
 		node = self.getRoot()
 		len = self.length()
@@ -194,7 +192,7 @@ class AVLTreeList(object):
 				return "retrieve while-loop didnt stopped"   ##Retrieve check 1
 
 			elif i < node.getLeft().getSize():
-				node = node.getLeft
+				node = node.getLeft()
 			elif i > node.getLeft().getSize():
 				i = i - 1 - node.getLeft().getSize()
 				node = node.getRight()
@@ -218,9 +216,9 @@ class AVLTreeList(object):
 
 
 		newNode = AVLNode(val)  ## creates the new node that is going to be inserted & init the new node stats
-		newNode.setParent(self.vitrualNode)
-		newNode.setLeft(self.vitrualNode)
-		newNode.setRight(self.vitrualNode)
+		newNode.setParent(self.virtualNode)
+		newNode.setLeft(self.virtualNode)
+		newNode.setRight(self.virtualNode)
 		newNode.size = 1
 		newNode.setHeight(0)
 
@@ -256,16 +254,21 @@ class AVLTreeList(object):
 				oldNodePre.setRight(newNode)
 				newNode.setParent(oldNodePre)
 
+        ## next while loop will be copied to after the rotations
+		node = newNode
+		while node.parent.getHeight() != -1:            ## maintenance of the height & size after insertion
+			node = node.getParent()
+			h = max(node.getLeft().getHeight(), node.getRight().getHeight()) + 1    ## h will be the height of the parent
+			node.setHeight(h)                                                     ## the set of the parent height
+			node.size = node.getLeft().getSize() + 1 + node.getRight().getSize()    ## the set of the parent height
+
 
 		rotateCnt = 0
 		"""here the tree will be the check if the tree needs to rotate, and if, will rotate (DNF coding rotating)
 		
-		afterwards we will compute all of the  fields"""
+		afterwards we will maintenance all of the  fields"""
 
-		node = newNode
-		while node.parent.getHeight() != -1:     ## computes the new size of all nodes from the new node to the root complexity O(logn)
-			node = node.parent
-			node.size = node.getLeft().getSize() + 1 + node.getRight().getSize()
+
 		return rotateCnt
 
 
@@ -278,10 +281,10 @@ class AVLTreeList(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 	def delete(self, i): ## DNF & first is basic
-		if i > self.length():
-			return
+		if i == 1:
+			if self.root.getHeight() == -1:
+				return -1
 
-		return -1
 
 
 	"""returns the value of the first item in the list
@@ -403,8 +406,8 @@ class AVLTreeList(object):
 
 """TESTER"""
 tree = AVLTreeList()
-list = ["a","b","c","d"]
-for i in range(len(list)):
-	tree.insert(i,list[i])
-for i in range(len(list)):
+tree.insert(0,"a")
+tree.insert(1,"b")
+tree.insert(0,"c")
+for i in range(3):
 	print(tree.retrieve(i).getValue())
