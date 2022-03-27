@@ -4,7 +4,7 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-## update time == 27/3 1800
+## update time == 27/3 2130
 
 """A class represnting a node in an AVL tree"""
 
@@ -202,6 +202,26 @@ class AVLTreeList(object):
 		return "retrieve didnt work!!"                       ##Retrieve check 2
 
 
+	def balancefactor(self, node):
+		return node.getLeft.gethight() - node.getRight.gethight()
+
+	def left_rotation(self, B):
+
+		return
+
+	def right_rotation(self, B):
+		A = B.getLeft()
+		B.setLeft(A.getRight())
+		B.getLeft().setParent(B)
+		A.setRight(B)
+		A.setParent(B.getParent())
+		if (B.getParent().getLeft() == B):
+			A.getParent().setLeft(A)
+		else:
+			A.getParent().setRight(A)
+		B.setParent(A)
+		return
+
 	"""inserts val at position i in the list
 
 	@type i: int
@@ -214,14 +234,12 @@ class AVLTreeList(object):
 	"""
 	def insert(self, i, val): ## DNF, the insertion is ready, the rotating isn't, and the fields are not ready
 
-
 		newNode = AVLNode(val)  ## creates the new node that is going to be inserted & init the new node stats
 		newNode.setParent(self.virtualNode)
 		newNode.setLeft(self.virtualNode)
 		newNode.setRight(self.virtualNode)
 		newNode.size = 1
 		newNode.setHeight(0)
-
 
 		if self.getRoot() == None:        ## insert the first node to the tree
 			self.root = newNode
@@ -235,7 +253,6 @@ class AVLTreeList(object):
 				self.max.setRight(newNode)
 				newNode.setParent(self.max)
 				self.max = newNode
-
 
 			elif i == 0:
 				self.min.setLeft(newNode)   ## places newNode at the start of the list
@@ -256,18 +273,38 @@ class AVLTreeList(object):
 
         ## next while loop will be copied to after the rotations
 		node = newNode
-		while node.parent.getHeight() != -1:            ## maintenance of the height & size after insertion
+		while node.parent.getHeight() != -1:           								## maintenance of the height & size after insertion
 			node = node.getParent()
 			h = max(node.getLeft().getHeight(), node.getRight().getHeight()) + 1    ## h will be the height of the parent
-			node.setHeight(h)                                                     ## the set of the parent height
+			node.setHeight(h)                                                       ## the set of the parent height
 			node.size = node.getLeft().getSize() + 1 + node.getRight().getSize()    ## the set of the parent height
 
-
+		"""here the tree will be the check if the tree needs to rotate, and if, will rotate (DNF coding rotating)"""
 		rotateCnt = 0
-		"""here the tree will be the check if the tree needs to rotate, and if, will rotate (DNF coding rotating)
-		
-		afterwards we will maintenance all of the  fields"""
+		node_rotation = newNode.getParent()
+		"""
+		while node_rotation.getHeight() != -1:
+			bf = AVLTreeList.balancefactor(node_rotation)
 
+			if (abs(bf) < 2):
+				node_rotation = node_rotation.getParent()
+			else:
+				rotateCnt += 1
+				if (bf == -2):
+					if (AVLTreeList.balancefactor(node_rotation.getRight) == -1):
+						AVLTreeList.left_rotation(node_rotation)
+					else:
+						AVLTreeList.right_rotation(node_rotation)
+						AVLTreeList.left_rotation(node_rotation)
+				elif (bf == 2):
+					if (AVLTreeList.balancefactor(node_rotation.getRight) == 1):
+						AVLTreeList.right_rotation(node_rotation)
+					else:
+						AVLTreeList.left_rotation(node_rotation)
+						AVLTreeList.right_rotation(node_rotation)
+				break 	## in insertion we have at most 1 rotation
+`		"""
+		"""afterwards we will maintenance all of the  fields"""
 
 		return rotateCnt
 
@@ -407,7 +444,22 @@ class AVLTreeList(object):
 """TESTER"""
 tree = AVLTreeList()
 tree.insert(0,"a")
-tree.insert(1,"b")
-tree.insert(0,"c")
+tree.insert(0, "c")
+tree.insert(0, "d")
+
 for i in range(3):
-	print(tree.retrieve(i).getValue())
+	t = tree.retrieve(i)
+	print("node " + t.getValue())
+	print("parent " + t.getParent().getValue())
+	print("left son " + t.getLeft().getValue())
+	print("right son " + t.getRight().getValue())
+
+tree.right_rotation(tree.retrieve(2))
+print()
+
+for i in range(3):
+	t = tree.retrieve(i)
+	print("node " + t.getValue())
+	print("parent " + t.getParent().getValue())
+	print("left son " + t.getLeft().getValue())
+	print("right son " + t.getRight().getValue())
