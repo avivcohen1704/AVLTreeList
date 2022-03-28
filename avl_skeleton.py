@@ -317,10 +317,68 @@ class AVLTreeList(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def delete(self, i): ## DNF & first is basic
-		if i == 1:
-			if self.root.getHeight() == -1:
-				return -1
+	def delete(self, i): 							## deletion finished WO rotations
+		if i == 0 and self.root.getHeight() == -1:
+			return -1
+
+		node = self.retrieve(i)
+		mntcNode = node.getParent()					## maintance node, will be used to maintance fields
+
+		if node.getHeight() == 0:                   ## if node has no children, we erase him
+			if node.getParent().getRight() == node:
+				node.getParent().setRight(None)
+				node.setParent(None)
+			else:
+				node.getParent().setLeft(None)
+				node.getParent(None)
+
+
+		elif node.getRight().getHeight() != -1:		## node has right son, we replace the vals of him & his succ
+			sucNode = self.Succesor(node)
+			mntcNode = sucNode.getParent()
+			val = sucNode.getValue()
+			node.setValue(val)
+			if node.getRight() == sucNode:          ## suc is right son of node
+				node.setRight(sucNode.getRight())
+				sucNode.getRight().setParent(node)
+
+			else:                                   ## suc is not right son of node
+				sucNode.getParent().setLeft(sucNode.getRight())
+				sucNode.getRight().setParent(sucNode.getParent())
+
+			sucNode.setParent(None)					## we delete the succ
+			sucNode.setRight(None)
+			sucNode.setLeft(None)
+
+
+		else:
+			preNode = self.Predecessor(node)		## node has left son, we replace the vals of him and his Pred
+			mntcNode = preNode.getParent()
+			val = preNode.getValue()
+			node.setValue(val)
+			if node.getLeft() == preNode:      		## pred is left son of node
+				node.setLeft(preNode.getLeft())
+				preNode.getLeft().setParent(node)
+
+			else:									## pred is not son if the node
+				preNode.getParent().setRight(preNode.getLeft())
+				preNode.getLeft().setParent(preNode.getParent())
+
+			preNode.setParent(None)					## we delete the pred
+			preNode.setRight(None)
+			preNode.setLeft(None)
+
+
+		while mntcNode.parent.getHeight() != -1:           	## maintenance of the height & size after insertion
+			mntcNode = mntcNode.getParent()
+			h = max(mntcNode.getLeft().getHeight(), mntcNode.getRight().getHeight()) + 1    ## h will be the height of the parent
+			mntcNode.setHeight(h)                                                       ## the set of the parent height
+			mntcNode.size = mntcNode.getLeft().getSize() + 1 + mntcNode.getRight().getSize()    ## the set of the parent height
+
+		"""here we will have the rotations
+		
+		afterwards we will compute our fields"""
+
 
 
 
