@@ -23,8 +23,12 @@ class AVLNode(object):
 		self.size = 1
 
 	def virtualInit(self):    ## init of the node to be inserted into the tree
+		self.left = self
+		self.right = self
+		self.parent = self
 		self.size = 0
 		self.setHeight(-1)
+
 
 
 
@@ -182,7 +186,10 @@ class AVLTreeList(object):
 	"""
 	def retrieve(self, i):  ##Supposed to be finished
 
+
 		node = self.getRoot()
+		if node == None:
+			return None
 		len = self.length()
 		cnt = 0
 		while i >= 0:                                        ## complexity O(logn) the height of the tree
@@ -271,17 +278,14 @@ class AVLTreeList(object):
 				oldNodePre.setRight(newNode)
 				newNode.setParent(oldNodePre)
 
-        ## next while loop will be copied to after the rotations
-		node = newNode
-		while node.parent.getHeight() != -1:           								## maintenance of the height & size after insertion
-			node = node.getParent()
-			h = max(node.getLeft().getHeight(), node.getRight().getHeight()) + 1    ## h will be the height of the parent
-			node.setHeight(h)                                                       ## the set of the parent height
-			node.size = node.getLeft().getSize() + 1 + node.getRight().getSize()    ## the set of the parent height
+		rebalancingCNT = self.rebalancing(newNode)
+
 
 		"""here the tree will be the check if the tree needs to rotate, and if, will rotate (DNF coding rotating)"""
-		rotateCnt = 0
+
+
 		node_rotation = newNode.getParent()
+
 		"""
 		while node_rotation.getHeight() != -1:
 			bf = AVLTreeList.balancefactor(node_rotation)
@@ -304,9 +308,9 @@ class AVLTreeList(object):
 						AVLTreeList.right_rotation(node_rotation)
 				break 	## in insertion we have at most 1 rotation
 `		"""
-		"""afterwards we will maintenance all of the  fields"""
 
-		return rotateCnt
+
+		return rebalancingCNT
 
 
 	"""deletes the i'th item in the list
@@ -323,62 +327,81 @@ class AVLTreeList(object):
 
 		node = self.retrieve(i)
 		mntcNode = node.getParent()					## maintance node, will be used to maintance fields
-
-		if node.getHeight() == 0:                   ## if node has no children, we erase him
-			if node.getParent().getRight() == node:
-				node.getParent().setRight(None)
-				node.setParent(None)
+		if node.getHeight() == 0:    ## if node has no children, we erase him
+			if node == self.getRoot():
+				self.root = self.virtualNode
+				return -1
+			elif node.getParent().getRight() == node:
+				node.getParent().setRight(self.virtualNode)
 			else:
-				node.getParent().setLeft(None)
-				node.getParent(None)
+				node.getParent().setLeft(self.virtualNode)
 
 
-		elif node.getRight().getHeight() != -1:		## node has right son, we replace the vals of him & his succ
+
+		elif node.getRight().getHeight() != -1:		## node has right son, we replace the node with his suc
 			sucNode = self.Succesor(node)
-			mntcNode = sucNode.getParent()
-			val = sucNode.getValue()
-			node.setValue(val)
 			if node.getRight() == sucNode:          ## suc is right son of node
-				node.setRight(sucNode.getRight())
-				sucNode.getRight().setParent(node)
+
+				sucNode.setParent(node.getParent())          ## pointer changes
+				node.getParent().setRight(sucNode)
+
+				sucNode.setLeft(node.getLeft())
+				node.getLeft().setParent(sucNode)
+
+				mntcNode = sucNode
 
 			else:                                   ## suc is not right son of node
-				sucNode.getParent().setLeft(sucNode.getRight())
-				sucNode.getRight().setParent(sucNode.getParent())
+				sucNode.getParent().setLeft(sucNode.getRight())        ## pointer chages
 
-			sucNode.setParent(None)					## we delete the succ
-			sucNode.setRight(None)
-			sucNode.setLeft(None)
+				sucNode.setParent(node.getParent())
+				node.getParent().setRight(sucNode)
+
+				sucNode.setLeft(node.getLeft())
+				node.getLeft().setParent(sucNode)
+
+				sucNode.setRight(node.getRight())
+				node.getRight().setParent(sucNode)
+
+				mntcNode = sucNode.getParent()
+
 
 
 		else:
 			preNode = self.Predecessor(node)		## node has left son, we replace the vals of him and his Pred
-			mntcNode = preNode.getParent()
-			val = preNode.getValue()
-			node.setValue(val)
 			if node.getLeft() == preNode:      		## pred is left son of node
-				node.setLeft(preNode.getLeft())
-				preNode.getLeft().setParent(node)
+				preNode.setParent(node.getParent())  ## pointer changes
+				node.getParent().setLeft(preNode)
+
+				preNode.setRight(node.getRight())
+				node.getRight().setParent(preNode)
+
+				mntcNode = preNode
 
 			else:									## pred is not son if the node
-				preNode.getParent().setRight(preNode.getLeft())
-				preNode.getLeft().setParent(preNode.getParent())
+				preNode.getParent().setRight(preNodeNode.getLeft())  ## pointer chages
 
-			preNode.setParent(None)					## we delete the pred
-			preNode.setRight(None)
-			preNode.setLeft(None)
+				preNode.setParent(node.getParent())
+				node.getParent().setLeftt(preNode)
 
+				preNode.setRight(node.getRight())
+				node.getRight().setParent(preNode)
 
-		while mntcNode.parent.getHeight() != -1:           	## maintenance of the height & size after insertion
-			mntcNode = mntcNode.getParent()
-			h = max(mntcNode.getLeft().getHeight(), mntcNode.getRight().getHeight()) + 1    ## h will be the height of the parent
-			mntcNode.setHeight(h)                                                       ## the set of the parent height
-			mntcNode.size = mntcNode.getLeft().getSize() + 1 + mntcNode.getRight().getSize()    ## the set of the parent height
+				preNode.setLeft(node.getLeft())
+				node.getLeft().setParent(preNode)
+
+				mntcNode = preNode.getParent()
+
+		node.virtualInit()  ##final deletion of the node
+		self.virtualNode.virtualInit()  ##resets the tree's virtual node in case it had pointers somewhere
+
+		rebalanceCNT = self.rebalancing(mntcNode)
+
 
 		"""here we will have the rotations
 		
 		afterwards we will compute our fields"""
 
+		return rebalanceCNT
 
 
 
@@ -472,39 +495,79 @@ class AVLTreeList(object):
 
 	def Succesor(self, node):
 		if node == self.max:
-			return None
-		n = node.getRight
-		if node.getRight != None:
-			while n.getLeft != None: ##Compexity O(logn)
-				n = n.getLeft
+			return node.getRight()
+		n = node.getRight()
+		if node.getRight().getHeight() != -1:
+			while n.getLeft().getHeight() != -1: ##Compexity O(logn)
+				n = n.getLeft()
 			return n
 		else:
 			n = node
-			while n.getParent.getLeft != n: ##Compexity O(logn)
-				n = n.getParent
+			while n.getParent().getLeft() != n: ##Compexity O(logn)
+				n = n.getParent()
 			return n
 
 	def Predecessor(self, node):
 		if node == self.min:
-			return None
-		n = node.getLeft
-		if node.getLeft != None:
-			while n.getRight != None:  ##Compexity O(logn)
-				n=n.getRight
+			return node.getLeft()
+		n = node.getLeft()
+		if node.getLeft().getHeight() != -1:
+			while n.getRight().getHeight() != -1:  ##Compexity O(logn)
+				n=n.getRight()
 			return n
 		else:
 			n = node
-			while n.getParent.getRight != n:  ##Compexity O(logn)
-				n = n.getParent
+			while n.getParent().getRight() != n:  ##Compexity O(logn)
+				n = n.getParent()
 			return n
+
+
+	""" maintance the fields of the tree from a node up
+	returns the sum of changes
+	"""
+	def rebalancing(self, node):
+		cnt = 0
+		h = max(node.getLeft().getHeight(), node.getRight().getHeight()) + 1    #computes only for the node itself
+		s = node.getLeft().getSize() + 1 + node.getRight().getSize()
+		if h != node.getHeight():
+			cnt += 1
+		if s != node.getSize():
+			cnt+=1
+		node.setHeight(h)
+		node.size = s
+
+		while node.getParent().getHeight() != -1: ## computes for all ancestors, comlexity O(logn)
+			node = node.getParent()
+			h = max(node.getLeft().getHeight(), node.getRight().getHeight()) + 1   		# h is height value
+			s = node.getLeft().getSize() + 1 + node.getRight().getSize()				# s is size value
+			if h != node.getHeight():
+				cnt += 1
+			if s != node.getSize():
+				cnt += 1
+			node.setHeight(h)
+			node.size = s
+
+		return cnt
 
 
 """TESTER"""
 tree = AVLTreeList()
 tree.insert(0,"a")
+tree.insert(0, "b")
 tree.insert(0, "c")
-tree.insert(0, "d")
 
+print(tree.retrieve(0).getHeight(), tree.retrieve(1).getHeight(), tree.retrieve(2).getHeight())
+
+tree.delete(0)
+print(tree.retrieve(0).getHeight(), tree.retrieve(1).getHeight())
+
+tree.retrieve(1)
+tree.delete(0)
+tree.delete(0)
+
+print(tree.retrieve(0))
+
+"""
 for i in range(3):
 	t = tree.retrieve(i)
 	print("node " + t.getValue())
@@ -521,3 +584,4 @@ for i in range(3):
 	print("parent " + t.getParent().getValue())
 	print("left son " + t.getLeft().getValue())
 	print("right son " + t.getRight().getValue())
+"""
