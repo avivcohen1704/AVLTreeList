@@ -4,7 +4,7 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-## update time == 30/3 1130
+## update time == 30/3 17:30
 
 """A class represnting a node in an AVL tree"""
 
@@ -205,29 +205,36 @@ class AVLTreeList(object):
 
 	""" check the balance factor of specific node """
 	def balancefactor(self, node):
-		return node.getLeft.gethight() - node.getRight.gethight()
+		return node.getLeft().getHight() - node.getRight().getHight()
 
 	""" left rotation (BF = -2 and BF OF RIGHT SON = -1)
 	
-	    A                              B
+	    C                              B
    	     \       Left Rotation        / \
-  	      B    - - - - - - - >       A   C 
+  	      B    - - - - - - - >       C   A 
            \                           
-	        C
-	                               
+	        A
+	                             
 	"""
 	def left_rotation(self, A):
-		bool = (A.getParent().getLeft() == A)
-		B = A.getRight()
-		A.setRight(B.getLeft())
-		A.getRight().setParent(A)
-		B.setLeft(A)
-		B.setParent(A.getParent())
-		if (bool):
-			A.getParent().setLeft(B)
+		direction = "root"
+		if C.getParent() != self.virtualNode:  ## C is not root
+			if C.getParent().getLeft() == C:
+				direction = 'L'
+			else:
+				direction = 'R'
+		B = C.getRight()
+		C.setRight(B.getLeft())
+		C.getRight().setParent(C)
+		B.setLeft(C)
+		B.setParent(C.getParent())
+		C.setParent(B)
+		if direction == 'L':
+			C.getParent().setLeft(B)
+		elif direction == 'R':
+			C.getParent().setRight(B)
 		else:
-			A.getParent().setRight(B)
-		A.setParent(B)
+			self.root = B
 		return
 
 
@@ -241,17 +248,24 @@ class AVLTreeList(object):
 	                                 
 	"""
 	def right_rotation(self, C):
-		bool = (C.getParent().getLeft() == C)
+		direction = "root"
+		if C.getParent() != self.virtualNode:   ## C is not root
+			if C.getParent().getLeft() == C:
+				direction = 'L'
+			else:
+				direction = 'R'
 		B = C.getLeft()
 		C.setLeft(B.getRight())
 		C.getLeft().setParent(C)
 		B.setRight(C)
 		B.setParent(C.getParent())
-		if (bool):
-			C.getParent().setLeft(B)
-		else:
-			C.getParent().setRight(B)
 		C.setParent(B)
+		if direction == 'L':
+			C.getParent().setLeft(B)
+		elif direction == 'R':
+			C.getParent().setRight(B)
+		else:
+			self.root = B
 		return
 
 
@@ -339,7 +353,6 @@ class AVLTreeList(object):
 
 		"""here the tree will be the check if the tree needs to rotate, and if, will rotate (DNF coding rotating)"""
 
-
 		node_rotation = newNode.getParent()
 
 		"""
@@ -351,17 +364,15 @@ class AVLTreeList(object):
 			else:
 				rotateCnt += 1
 				if (bf == -2):
-					if (AVLTreeList.balancefactor(node_rotation.getRight) == -1):
+					if (AVLTreeList.balancefactor(node_rotation.getRight()) == -1):
 						AVLTreeList.left_rotation(node_rotation)
 					else:
-						AVLTreeList.right_rotation(node_rotation)
-						AVLTreeList.left_rotation(node_rotation)
+						AVLTreeList.right_left_rotation(node_rotation)
 				elif (bf == 2):
-					if (AVLTreeList.balancefactor(node_rotation.getRight) == 1):
+					if (AVLTreeList.balancefactor(node_rotation.getRight()) == 1):
 						AVLTreeList.right_rotation(node_rotation)
 					else:
-						AVLTreeList.left_rotation(node_rotation)
-						AVLTreeList.right_rotation(node_rotation)
+						AVLTreeList.left_right_rotation(node_rotation)
 				break 	## in insertion we have at most 1 rotation
 `		"""
 
@@ -646,9 +657,6 @@ tree.insert(0, "A")
 
 tree.print_Tree(3)
 
-print("")
 tree.right_rotation(tree.retrieve(2))
-print("AFTER ROTAION:")
-print("")
 
-tree.print_Tree(4)
+tree.print_Tree(3)
