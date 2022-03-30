@@ -4,7 +4,7 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-## update time == 30/3 17:30
+## update time == 30/3 22:30
 
 """A class represnting a node in an AVL tree"""
 
@@ -205,7 +205,7 @@ class AVLTreeList(object):
 
 	""" check the balance factor of specific node """
 	def balancefactor(self, node):
-		return node.getLeft().getHight() - node.getRight().getHight()
+		return node.getLeft().getHeight() - node.getRight().getHeight()
 
 	""" left rotation (BF = -2 and BF OF RIGHT SON = -1)
 	
@@ -218,24 +218,30 @@ class AVLTreeList(object):
 	"""
 	def left_rotation(self, C):
 		direction = "root"
-		if C.getParent() != self.virtualNode:  ## C is not root
+		if C.getParent() != self.virtualNode:  ## if C is not root
 			if C.getParent().getLeft() == C:
 				direction = 'L'
 			else:
 				direction = 'R'
+
+		## change the indexes of B, C (NOT A)
 		B = C.getRight()
 		C.setRight(B.getLeft())
-		C.getRight().setParent(C)
+		C.getRight().setParent(C) ### den VNodeinit?
 		B.setLeft(C)
 		B.setParent(C.getParent())
 		C.setParent(B)
+
+		## connect C parent to B from left or right
 		if direction == 'L':
 			C.getParent().setLeft(B)
 		elif direction == 'R':
 			C.getParent().setRight(B)
 		else:
 			self.root = B
-		return
+		self.virtualNode.virtualInit()
+		cnt = self.rebalancing(C)
+		return cnt
 
 
 	""" right rotation (BF = +2 and BF OF LEFT SON = +1)
@@ -249,24 +255,30 @@ class AVLTreeList(object):
 	"""
 	def right_rotation(self, C):
 		direction = "root"
-		if C.getParent() != self.virtualNode:   ## C is not root
+		if C.getParent() != self.virtualNode:   ## if C is not root
 			if C.getParent().getLeft() == C:
 				direction = 'L'
 			else:
 				direction = 'R'
+
+		## change the indexes of B, C (NOT A)
 		B = C.getLeft()
 		C.setLeft(B.getRight())
 		C.getLeft().setParent(C)
 		B.setRight(C)
 		B.setParent(C.getParent())
 		C.setParent(B)
+
+		## connect C parent to B from left or right
 		if direction == 'L':
 			C.getParent().setLeft(B)
 		elif direction == 'R':
 			C.getParent().setRight(B)
 		else:
 			self.root = B
-		return
+		self.virtualNode.virtualInit()
+		cnt = self.rebalancing(C)
+		return cnt
 
 
 	""" left then right rotation (BF = +2 and BF OF LEFT SON = -1)
@@ -279,9 +291,9 @@ class AVLTreeList(object):
 	                      
 	"""
 	def left_right_rotation(self, C):
-		self.left_rotation(C.getLeft())
-		self.right_rotation(C)
-		return
+		cnt = self.left_rotation(C.getLeft())      ## rotation left of A,B
+		cnt += self.right_rotation(C)			   ## rotation right of B, C
+		return cnt
 
 
 	""" right then left rotation (BF = -2 and BF OF RIGHT SON = +1)
@@ -294,9 +306,9 @@ class AVLTreeList(object):
 	          
 	"""
 	def right_left_rotation(self, A):
-		self.right_rotation(A.getRight())
-		self.left_rotation(A)
-		return
+		cnt = self.right_rotation(A.getRight())		## rotation right of B, C
+		cnt += self.left_rotation(A)				## rotation left of A, B
+		return cnt
 
 
 	"""inserts val at position i in the list
@@ -350,31 +362,41 @@ class AVLTreeList(object):
 
 		rebalancingCNT = self.rebalancing(newNode)
 
+		"""here the tree will be the check if the tree needs to rotate, and if, will rotate and return the number of balance actions (DNF coding rotating)"""
+		is_need_rotation = self.is_Rotation(newNode.getParent())
 
-		"""here the tree will be the check if the tree needs to rotate, and if, will rotate (DNF coding rotating)"""
+		return is_need_rotation + rebalancingCNT
 
-		node_rotation = newNode.getParent()
 
-		"""
-		while node_rotation.getHeight() != -1:
-			bf = AVLTreeList.balancefactor(node_rotation)
+	""" the function check if the tree need rotations, from the specific node to the root, and return the number of balancing actions"""
+	def is_Rotation (self, node):
 
+		rebalancingCNT = 0
+		while node.getHeight() != -1:
+
+			bf = self.balancefactor(node)			## check the balance factor of the node
+
+			## if the bf is OK continue to the parent until u reach to the root
 			if (abs(bf) < 2):
-				node_rotation = node_rotation.getParent()
+				node = node.getParent()
+
+			## the bf is not OK, so do one of the rotations
 			else:
-				rotateCnt += 1
 				if (bf == -2):
-					if (AVLTreeList.balancefactor(node_rotation.getRight()) == -1):
-						AVLTreeList.left_rotation(node_rotation)
+					if ((self.balancefactor(node.getRight())) == -1):
+						## bf of right son is -1
+						rebalancingCNT = self.left_rotation(node)
 					else:
-						AVLTreeList.right_left_rotation(node_rotation)
+						## bf of right son is +1
+						rebalancingCNT = self.right_left_rotation(node)
 				elif (bf == 2):
-					if (AVLTreeList.balancefactor(node_rotation.getRight()) == 1):
-						AVLTreeList.right_rotation(node_rotation)
+					if (AVLTreeList.balancefactor(node.getRight()) == 1):
+						## bf of left son is +1
+						rebalancingCNT = self.right_rotation(node)
 					else:
-						AVLTreeList.left_right_rotation(node_rotation)
-				break 	## in insertion we have at most 1 rotation
-`		"""
+						## bf of left son is -1
+						rebalancingCNT = self.left_right_rotation(node)
+				break 	## do only one rotation
 
 		return rebalancingCNT
 
@@ -468,8 +490,6 @@ class AVLTreeList(object):
 
 		return rebalanceCNT
 
-
-
 	"""returns the value of the first item in the list
 
 	@rtype: str
@@ -545,8 +565,6 @@ class AVLTreeList(object):
 			node = node.Succesor
 		return node
 
-
-
 	"""returns the root of the tree representing the list
 
 	@rtype: AVLNode
@@ -556,7 +574,6 @@ class AVLTreeList(object):
 		if self.root.height == -1:
 			return None
 		return self.root
-
 
 	def Succesor(self, node):
 		if node == self.max:
@@ -585,7 +602,6 @@ class AVLTreeList(object):
 			while n.getParent().getRight() != n:  ##Compexity O(logn)
 				n = n.getParent()
 			return n
-
 
 	""" maintance the fields of the tree from a node up
 	returns the sum of changes
@@ -631,33 +647,37 @@ class AVLTreeList(object):
 
 """TESTER"""
 
-"""
-tree = AVLTreeList()
-tree.insert(0,"a")
-tree.insert(0, "b")
-tree.insert(0, "c")
-
-print(tree.retrieve(0).getHeight(), tree.retrieve(1).getHeight(), tree.retrieve(2).getHeight())
-
-tree.delete(0)
-print(tree.retrieve(0).getHeight(), tree.retrieve(1).getHeight())
-
-tree.retrieve(1)
-tree.delete(0)
-tree.delete(0)
-
-print(tree.retrieve(0))
-"""
 
 tree = AVLTreeList()
-tree.insert(0, "A")
+
+print("###############")
+
+tree.insert(0, "C")
+tree.print_Tree(1)
+
+print("###############")
+
+
 tree.insert(1, "B")
-tree.insert(2, "C")
+tree.print_Tree(2)
+
+print("###############")
 
 
+tree.insert(2, "A")
 tree.print_Tree(3)
 
-tree.left_rotation(tree.retrieve(2))
-print("AFTER ROTAION:")
+print("###############")
 
-tree.print_Tree(3)
+tree.insert(3, "Z")
+tree.print_Tree(4)
+
+print("###############")
+
+tree.insert(4, "P")
+tree.print_Tree(4)
+print(tree.retrieve(0).getValue())
+print(tree.retrieve(1).getValue())
+print(tree.retrieve(2).getValue())
+print(tree.retrieve(3).getValue())
+print(tree.retrieve(4).getValue())
