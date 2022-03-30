@@ -216,7 +216,7 @@ class AVLTreeList(object):
 	        A
 	                             
 	"""
-	def left_rotation(self, A):
+	def left_rotation(self, C):
 		direction = "root"
 		if C.getParent() != self.virtualNode:  ## C is not root
 			if C.getParent().getLeft() == C:
@@ -650,13 +650,14 @@ print(tree.retrieve(0))
 """
 
 tree = AVLTreeList()
-tree.insert(0, "C")
-tree.insert(0, "B")
 tree.insert(0, "A")
+tree.insert(1, "B")
+tree.insert(2, "C")
 
 
 tree.print_Tree(3)
 
-tree.right_rotation(tree.retrieve(2))
+tree.left_rotation(tree.retrieve(2))
+print("AFTER ROTAION:")
 
 tree.print_Tree(3)
