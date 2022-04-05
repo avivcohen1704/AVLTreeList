@@ -168,7 +168,7 @@ class AVLTreeList(object):
 	@returns: True if the list is empty, False otherwise
 	"""
 	def empty(self): ##Supposed to be Done
-		if self.root.getHeight == -1:
+		if self.root.getHeight() == -1:
 			return True
 		return False
 
@@ -213,7 +213,7 @@ class AVLTreeList(object):
 	@rtype: list
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def insert(self, i, val): ## DNF, the insertion is ready, the rotating isn't, and the fields are not ready
+	def insert(self, i, val): ## FINISHED WO CNT
 
 		newNode = AVLNode(val)  ## creates the new node that is going to be inserted & init the new node stats
 		newNode.setParent(self.virtualNode)
@@ -243,7 +243,7 @@ class AVLTreeList(object):
 		else:
 			oldNode = self.retrieve(i)  ## retrieves the i'th node - that is going to be replace, retrieve comlexity == O(logn)
 
-			if oldNode.getLeft().getHeight == -1:
+			if oldNode.getLeft().getHeight() == -1:
 				oldNode.setLeft(newNode)
 				newNode.setParent(oldNode)
 
@@ -257,7 +257,7 @@ class AVLTreeList(object):
 		"""here the tree will be the check if the tree needs to rotate, and if, will rotate and return the number of balance actions (DNF coding rotating)"""
 		is_need_rotation = self.is_Rotation(newNode.getParent())
 
-		return is_need_rotation + rebalancingCNT
+		return
 
 	"""deletes the i'th item in the list
 
@@ -268,10 +268,18 @@ class AVLTreeList(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 	def delete(self, i): 							## deletion finished WO rotations
-		if i == 0 and self.root.getHeight() == -1:
+		if i == 0 and self.root.getHeight() == -1:  ## the tree is empty
 			return -1
 
 		node = self.retrieve(i)
+		min = False
+		max = False
+		if self.first() == node or self.last() == node:
+			if self.first() == node:
+				min = True
+			else:
+				max = True
+
 		mntcNode = node.getParent()					## maintance node, will be used to maintance fields
 		if node.getHeight() == 0:  				    ## if node has no children, we erase him
 			if node == self.getRoot():
@@ -289,7 +297,10 @@ class AVLTreeList(object):
 			if node.getRight() == sucNode:          ## suc is right son of node
 
 				sucNode.setParent(node.getParent())          ## pointer changes
-				node.getParent().setRight(sucNode)
+				if node.getParent().getRight() == node:
+					node.getParent().setRight(sucNode)
+				else:
+					node.getParent().setLeft(sucNode)
 
 				sucNode.setLeft(node.getLeft())
 				node.getLeft().setParent(sucNode)
@@ -297,10 +308,14 @@ class AVLTreeList(object):
 				mntcNode = sucNode
 
 			else:                                   ## suc is not right son of node
+				mntcNode = sucNode.getParent()
 				sucNode.getParent().setLeft(sucNode.getRight())        ## pointer chages
 
 				sucNode.setParent(node.getParent())
-				node.getParent().setRight(sucNode)
+				if node.getParent().getRight() == node:
+					node.getParent().setRight(sucNode)
+				else:
+					node.getParent().setLeft(sucNode)
 
 				sucNode.setLeft(node.getLeft())
 				node.getLeft().setParent(sucNode)
@@ -308,14 +323,17 @@ class AVLTreeList(object):
 				sucNode.setRight(node.getRight())
 				node.getRight().setParent(sucNode)
 
-				mntcNode = sucNode.getParent()
 
 
 		else:
 			preNode = self.Predecessor(node)		## node has left son, we replace the vals of him and his Pred
 			if node.getLeft() == preNode:      		## pred is left son of node
 				preNode.setParent(node.getParent())  ## pointer changes
-				node.getParent().setLeft(preNode)
+
+				if node.getParent().getRight() == node:
+					node.getParent().setRight(preNode)
+				else:
+					node.getParent().setLeft(preNode)
 
 				preNode.setRight(node.getRight())
 				node.getRight().setParent(preNode)
@@ -323,28 +341,40 @@ class AVLTreeList(object):
 				mntcNode = preNode
 
 			else:									## pred is not son if the node
+				mntcNode = preNode.getParent()
+
 				preNode.getParent().setRight(preNodeNode.getLeft())  ## pointer chages
 
 				preNode.setParent(node.getParent())
-				node.getParent().setLeftt(preNode)
+				if node.getParent().getLeft() == node:
+					node.getParent().setLeft(preNode)
+				else:
+					node.getParent().setRight(preNode)
 
 				preNode.setRight(node.getRight())
 				node.getRight().setParent(preNode)
 
 				preNode.setLeft(node.getLeft())
 				node.getLeft().setParent(preNode)
+		if min or max:
+			MMNode = self.getRoot()
+			if min:
+				while MMNode.getLeft().getHeight() != -1:
+					MMNode = MMNode.getLeft()
+				self.min = MMNode
+			else:
+				while MMNode.getRight().getHeight() != -1:
+					MMNode = MMNode.getRight()
+				self.max = MMNode
 
-				mntcNode = preNode.getParent()
 
 		node.virtualInit()  ##final deletion of the node
 		self.virtualNode.virtualInit()  ##resets the tree's virtual node in case it had pointers somewhere
 
 		rebalanceCNT = self.rebalancing(mntcNode)
 
+		self.is_Rotation(mntcNode)
 
-		"""here we will have the rotations
-		
-		afterwards we will compute our fields"""
 
 		return rebalanceCNT
 
@@ -374,8 +404,8 @@ class AVLTreeList(object):
 		node = self.min
 		i = 1
 		while i <= self.length():
-			Array.append(node.getValue)
-			node = node.Succesor
+			Array.append(node.getValue())
+			node = self.Succesor(node)
 			i +=1
 
 		return Array
@@ -386,7 +416,7 @@ class AVLTreeList(object):
 	@returns: the size of the list
 	"""
 	def length(self):  ## supposed to be finished
-		return self.getRoot().getSize()
+		return self.root.getSize()
 
 	"""splits the list at the i'th index
 
@@ -416,8 +446,7 @@ class AVLTreeList(object):
 			newRoot.setLeft(self.root)
 			self.delete(self.getSize())  # deletes newRoot from self
 
-			while abs(self.balancefactor(
-					newRoot)) > 1:  # "glides" alone self until the height matches self's height complexity O(logm) m = size of self
+			while abs(self.balancefactor(newRoot)) > 1:  # "glides" alone self until the height matches self's height complexity O(logm) m = size of self
 				if newRoot.balancefactor() > 0:
 					newRoot.setLeft(newRoot.getLeft().getRight())
 					if abs(self.balancefactor(newRoot)) < 1:
@@ -441,8 +470,7 @@ class AVLTreeList(object):
 			newRoot.setLeft(self.root)
 			lst.delete(0)
 
-			while abs(self.balancefactor(
-					newRoot)) > 1:  # "glides" alone self until the height matches self's height complexity O(logm) m = size of self
+			while abs(self.balancefactor(newRoot)) > 1:  # "glides" alone self until the height matches self's height complexity O(logm) m = size of self
 				if newRoot.balancefactor() > 0:
 					newRoot.setLeft(newRoot.getLeft().getRight())
 					if abs(self.balancefactor(newRoot)) < 1:
@@ -502,7 +530,7 @@ class AVLTreeList(object):
 			n = node
 			while n.getParent().getLeft() != n: ##Compexity O(logn)
 				n = n.getParent()
-			return n
+			return n.getParent()
 
 	"""returns the predecessor of a given node
 
@@ -676,22 +704,20 @@ class AVLTreeList(object):
 			## the bf is not OK, so do one of the rotations
 			else:
 				if (bf == -2):
-					if ((self.balancefactor(node.getRight())) == -1):
+					if ((self.balancefactor(node.getRight())) == -1 or (self.balancefactor(node.getRight())) == 0):
 						## bf of right son is -1
 						rebalancingCNT = self.left_rotation(node)
 					else:
 						## bf of right son is +1
 						rebalancingCNT = self.right_left_rotation(node)
 				elif (bf == 2):
-					if (self.balancefactor(node.getRight()) == 1):
+					if (self.balancefactor(node.getLeft()) == 1) or (self.balancefactor(node.getLeft()) == 0):
 						## bf of left son is +1
 						rebalancingCNT = self.right_rotation(node)
 					else:
 						## bf of left son is -1
 						rebalancingCNT = self.left_right_rotation(node)
-				break  ## do only one rotation
-
-		return rebalancingCNT
+				node = node.getParent()
 
 	""" the function print the first n elements in the tree
 	"""
@@ -782,28 +808,20 @@ class AVLTreeList(object):
 ###TESTER###
 ############
 """
+import random
+ABC = "abcdefghijklmnopqrstuvwxyz"
+Len = len(ABC)
+random.seed(49)
 
+tree1 = AVLTreeList()                   # random tree
+tree1.insert(0,"a")
+for i in range(2**10):
+    val = ABC[random.randrange(0, Len)]
+    j = random.randrange(0, tree1.length())
+    tree1.insert(j , val)
+for i in range((2**10)-1):
+	j = random.randrange(0, tree1.length())
+	tree1.delete(j)
+	print(tree1)
 
-tree = AVLTreeList()
-
-tree.insert(0, "E")
-##tree.print_Tree(1)
-
-tree.insert(1, "D")
-##tree.print_Tree(2)
-
-tree.insert(2, "C")
-##tree.print_Tree(3)
-
-tree.insert(3, "B")
-##tree.print_Tree(4)
-
-tree.insert(4, "A")
-##tree.print_Tree(4)
-
-tree.insert(0, "F")
-##tree.print_Tree(6)
-
-tree.insert(2, "G")
-##tree.print_Tree(7)
 
