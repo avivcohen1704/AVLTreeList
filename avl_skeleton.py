@@ -156,7 +156,6 @@ class AVLTreeList(object):
 		self.min = self.root     		  ##  both min & max points at the root
 		self.max = self.root
 
-
 	"""returns whether the list is empty
 
 	@rtype: bool
@@ -558,8 +557,8 @@ class AVLTreeList(object):
 	""" left rotation (BF = -2 and BF OF RIGHT SON = -1)
 
         C                              B
-            \       Left Rotation        / \
-            B    - - - - - - - >       C   A 
+         \       Left Rotation        / \
+          B    - - - - - - - >       C   A 
            \                           
             A
 
@@ -582,9 +581,9 @@ class AVLTreeList(object):
 
 		## connect C parent to B from left or right
 		if direction == 'L':
-			C.getParent().setLeft(B)
+			B.getParent().setLeft(B)
 		elif direction == 'R':
-			C.getParent().setRight(B)
+			B.getParent().setRight(B)
 		else:
 			self.root = B
 		self.virtualNode.virtualInit()
@@ -594,7 +593,7 @@ class AVLTreeList(object):
 	""" right rotation (BF = +2 and BF OF LEFT SON = +1)
 
            C                               B
-             /       Right Rotation          / \
+          /       Right Rotation          / \
          B        - - - - - - - >        A   C 
         /                                
        A
@@ -618,9 +617,9 @@ class AVLTreeList(object):
 
 		## connect C parent to B from left or right
 		if direction == 'L':
-			C.getParent().setLeft(B)
+			B.getParent().setLeft(B)
 		elif direction == 'R':
-			C.getParent().setRight(B)
+			B.getParent().setRight(B)
 		else:
 			self.root = B
 		self.virtualNode.virtualInit()
@@ -705,10 +704,6 @@ class AVLTreeList(object):
 
 
 
-
-
-
-
 """
 ############
 ###TESTER###
@@ -716,38 +711,27 @@ class AVLTreeList(object):
 """
 
 
-
-
 tree = AVLTreeList()
 
-print("###############")
+tree.insert(0, "E")
+##tree.print_Tree(1)
 
-tree.insert(0, "C")
-tree.print_Tree(1)
+tree.insert(1, "D")
+##tree.print_Tree(2)
 
-print("###############")
+tree.insert(2, "C")
+##tree.print_Tree(3)
 
+tree.insert(3, "B")
+##tree.print_Tree(4)
 
-tree.insert(1, "B")
-tree.print_Tree(2)
+tree.insert(4, "A")
+##tree.print_Tree(4)
 
-print("###############")
+tree.insert(0, "F")
+##tree.print_Tree(6)
 
+tree.insert(2, "G")
+##tree.print_Tree(7)
 
-tree.insert(2, "A")
-tree.print_Tree(3)
-
-print("###############")
-
-tree.insert(3, "Z")
-tree.print_Tree(4)
-
-print("###############")
-
-tree.insert(4, "P")
-tree.print_Tree(4)
-print(tree.retrieve(0).getValue())
-print(tree.retrieve(1).getValue())
-print(tree.retrieve(2).getValue())
-print(tree.retrieve(3).getValue())
-print(tree.retrieve(4).getValue())
+AVLTreeList.printree(tree.getRoot())
