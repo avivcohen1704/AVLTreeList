@@ -4,7 +4,7 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-## update time == 31/3 10:30
+## update time == 04/05 16:00
 
 """A class represnting a node in an AVL tree"""
 
@@ -155,6 +155,12 @@ class AVLTreeList(object):
 		self.root.setParent(virtualNode)  ## **
 		self.min = self.root     		  ##  both min & max points at the root
 		self.max = self.root
+
+	def __repr__(self):  # no need to understand the implementation of this one
+		out = ""
+		for row in self.printree(self.root):  # need printree.py file
+			out = out + row + "\n"
+		return out
 
 	"""returns whether the list is empty
 
@@ -677,7 +683,7 @@ class AVLTreeList(object):
 						## bf of right son is +1
 						rebalancingCNT = self.right_left_rotation(node)
 				elif (bf == 2):
-					if (AVLTreeList.balancefactor(node.getRight()) == 1):
+					if (self.balancefactor(node.getRight()) == 1):
 						## bf of left son is +1
 						rebalancingCNT = self.right_rotation(node)
 					else:
@@ -702,6 +708,73 @@ class AVLTreeList(object):
 		return
 
 
+	def printree(self, t, bykey=False):
+		"""Print a textual representation of t
+        bykey=True: show keys instead of values"""
+		# for row in trepr(t, bykey):
+		#        print(row)
+		return self.trepr(t, bykey)
+
+	def trepr(self, t, bykey=False):
+		"""Return a list of textual representations of the levels in t
+        bykey=True: show keys instead of values"""
+		if t.getHeight() == -1:
+			return ["#"]
+
+		thistr = str(t.value)
+
+		return self.conc(self.trepr(t.left, bykey), thistr, self.trepr(t.right, bykey))
+
+	def conc(self, left, root, right):
+		"""Return a concatenation of textual represantations of
+        a root node, its left node, and its right node
+        root is a string, and left and right are lists of strings"""
+
+		lwid = len(left[-1])
+		rwid = len(right[-1])
+		rootwid = len(root)
+
+		result = [(lwid + 1) * " " + root + (rwid + 1) * " "]
+
+		ls = self.leftspace(left[0])
+		rs = self.rightspace(right[0])
+		result.append(ls * " " + (lwid - ls) * "_" + "/" + rootwid * " " + "\\" + rs * "_" + (rwid - rs) * " ")
+
+		for i in range(max(len(left), len(right))):
+			row = ""
+			if i < len(left):
+				row += left[i]
+			else:
+				row += lwid * " "
+
+			row += (rootwid + 2) * " "
+
+			if i < len(right):
+				row += right[i]
+			else:
+				row += rwid * " "
+
+			result.append(row)
+
+		return result
+
+	def leftspace(self, row):
+		"""helper for conc"""
+		# row is the first row of a left node
+		# returns the index of where the second whitespace starts
+		i = len(row) - 1
+		while row[i] == " ":
+			i -= 1
+		return i + 1
+
+	def rightspace(self, row):
+		"""helper for conc"""
+		# row is the first row of a right node
+		# returns the index of where the first whitespace ends
+		i = 0
+		while row[i] == " ":
+			i += 1
+		return i
 
 
 """
@@ -734,4 +807,3 @@ tree.insert(0, "F")
 tree.insert(2, "G")
 ##tree.print_Tree(7)
 
-AVLTreeList.printree(tree.getRoot())
