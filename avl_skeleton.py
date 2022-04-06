@@ -272,6 +272,10 @@ class AVLTreeList(object):
 			return -1
 
 		node = self.retrieve(i)
+		root = False
+		if self.root == node:
+			root = True
+
 		min = False
 		max = False
 		if self.first() == node or self.last() == node:
@@ -308,6 +312,7 @@ class AVLTreeList(object):
 				mntcNode = sucNode
 
 			else:                                   ## suc is not right son of node
+				sucNode.getRight().setParent(sucNode.getParent())
 				mntcNode = sucNode.getParent()
 				sucNode.getParent().setLeft(sucNode.getRight())        ## pointer chages
 
@@ -323,7 +328,8 @@ class AVLTreeList(object):
 				sucNode.setRight(node.getRight())
 				node.getRight().setParent(sucNode)
 
-
+			if root:
+				self.root = sucNode
 
 		else:
 			preNode = self.Predecessor(node)		## node has left son, we replace the vals of him and his Pred
@@ -351,11 +357,17 @@ class AVLTreeList(object):
 				else:
 					node.getParent().setRight(preNode)
 
+				preNode.getLeft().setParent(preNode.getParent())
+
 				preNode.setRight(node.getRight())
 				node.getRight().setParent(preNode)
 
 				preNode.setLeft(node.getLeft())
 				node.getLeft().setParent(preNode)
+
+			if root:
+				self.root = preNode
+
 		if min or max:
 			MMNode = self.getRoot()
 			if min:
@@ -811,7 +823,6 @@ class AVLTreeList(object):
 import random
 ABC = "abcdefghijklmnopqrstuvwxyz"
 Len = len(ABC)
-random.seed(49)
 
 tree1 = AVLTreeList()                   # random tree
 tree1.insert(0,"a")
@@ -819,9 +830,16 @@ for i in range(2**10):
     val = ABC[random.randrange(0, Len)]
     j = random.randrange(0, tree1.length())
     tree1.insert(j , val)
-for i in range((2**10)-1):
-	j = random.randrange(0, tree1.length())
-	tree1.delete(j)
-	print(tree1)
+print(tree1)
 
+for i in range(tree1.length()):
+	if range(0, tree1.length()) == 0:
+		tree1.delete(0)
+	else:
+		j = random.randrange(0, tree1.length())
 
+		tree1.delete(j)
+		print(tree1)
+		print(i)
+
+print("###random delete works###")
