@@ -3,9 +3,9 @@
 ## cloning:
 ## git clone git@github.com:avivcohen1704/DataStructure-1.git
 ## how to use testers
-###1 - copy to the end of avl-skeleton
-###2 - create a tester for the specific method you want to test
-###3 - make sure u change the tree's name
+### 1 - copy to the end of avl-skeleton
+### 2 - create a tester for the specific method you want to test
+### 3 - make sure u change the tree's name
 
 # where we stand - as to 7/4 1300
 ## vv == done & checked
