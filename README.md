@@ -2,8 +2,12 @@
 
 ## cloning:
 ## git clone git@github.com:avivcohen1704/DataStructure-1.git
+## how to use testers
+###1 - copy to the end of avl-skeleton
+###2 - create a tester for the specific method you want to test
+###3 - make sure u change the tree's name
 
-# where we stand - as to 31/3 10:30
+# where we stand - as to 7/4 1300
 ## vv == done & checked
 ## v == done & was not checked
 ## x == not done
@@ -30,23 +34,25 @@
 ### init vv
 ### empty vv
 ### retrieve vv
-### insert x/v
-### delete x/v
+### insert vv
+### delete vv
 ### first vv
 ### last vv
 ### listToArray vv
 ### length vv
 ### split x
-### concat v
+### concat vv
 ### search vv
 ### getRoot vv
 ### successor vv
 ### predecessor vv
 ### rebalancing vv
 ### balancefactor vv
-### left_rotations v/vv
-### right_rotation v/vv
-### LR_rotation v/vv
-### RL_rotation v/vv
-### is rotation x/v
+### left_rotations vv
+### right_rotation vv
+### LR_rotation vv
+### RL_rotation vv
+### is rotation vv
+
+
 

@@ -156,6 +156,7 @@ class AVLTreeList(object):
 		self.min = self.root     		  ##  both min & max points at the root
 		self.max = self.root
 
+
 	def __repr__(self):  # no need to understand the implementation of this one
 		out = ""
 		for row in self.printree(self.root):  # need printree.py file
@@ -167,7 +168,7 @@ class AVLTreeList(object):
 	@rtype: bool
 	@returns: True if the list is empty, False otherwise
 	"""
-	def empty(self): ##Supposed to be Done
+	def empty(self): 								#finished
 		if self.root.getHeight() == -1:
 			return True
 		return False
@@ -180,7 +181,7 @@ class AVLTreeList(object):
 	@rtype: str
 	@returns: the the value of the i'th item in the list
 	"""
-	def retrieve(self, i):  ##Supposed to be finished
+	def retrieve(self, i): 							#finished
 
 		node = self.getRoot()
 		if node == None:
@@ -267,7 +268,7 @@ class AVLTreeList(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
-	def delete(self, i): 							## deletion finished WO rotations
+	def delete(self, i): 							#finished!!!!!
 		if i == 0 and self.root.getHeight() == -1:  ## the tree is empty
 			return -1
 
@@ -395,7 +396,7 @@ class AVLTreeList(object):
 	@rtype: str
 	@returns: the value of the first item, None if the list is empty
 	"""
-	def first(self):
+	def first(self):								#finished
 		return self.min
 
 	"""returns the value of the last item in the list
@@ -403,7 +404,7 @@ class AVLTreeList(object):
 	@rtype: str
 	@returns: the value of the last item, None if the list is empty
 	"""
-	def last(self):
+	def last(self):									#finished
 		return self.max
 
 	"""returns an array representing list 
@@ -411,7 +412,7 @@ class AVLTreeList(object):
 	@rtype: list
 	@returns: a list of strings representing the data structure
 	"""
-	def listToArray(self):  ##Supposed to be finished
+	def listToArray(self):  						#finished
 		Array = []
 		node = self.min
 		i = 1
@@ -427,7 +428,7 @@ class AVLTreeList(object):
 	@rtype: int
 	@returns: the size of the list
 	"""
-	def length(self):  ## supposed to be finished
+	def length(self):  								#finished
 		return self.root.getSize()
 
 	"""splits the list at the i'th index
@@ -450,56 +451,95 @@ class AVLTreeList(object):
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
 	def concat(self, lst):
-		diff = abs(self.root.getHeight() - self.root.getHeight())  # what would be returned
+		diff = abs(self.root.getHeight() - lst.getRoot().getHeight())
 
-		if self.getHeight() >= lst.getHeight():  # if self height >= lst height
-			newRoot = self.Last()  # sets the last node of self to be the new root
-			newRoot.setRight(lst.root)  # sets the roots of self & lst to be the L & R sos of the new root
-			newRoot.setLeft(self.root)
-			self.delete(self.getSize())  # deletes newRoot from self
 
-			while abs(self.balancefactor(newRoot)) > 1:  # "glides" alone self until the height matches self's height complexity O(logm) m = size of self
-				if newRoot.balancefactor() > 0:
-					newRoot.setLeft(newRoot.getLeft().getRight())
-					if abs(self.balancefactor(newRoot)) < 1:
-						newRoot.setParent(newRoot.getLeft().getParent())
-						newRoot.getParent().setLeft(newRoot)
-				else:
-					newRoot.setRight(newRoot.getRight().getLeft())
-					if abs(self.balancefactor(newRoot)) > 1:
-						newRoot.setParent(newRoot.getRight().getParent())
-						newRoot.getParent().setLeft(newRoot)
+		if self.root.getHeight() >= lst.root.getHeight():
+			newRoot = self.last()
+			mntcNode = newRoot.getParent()						# will be used for maintance
+			oldRoot = self.root
 
-			rotationNode = newRoot
+			newRoot.getLeft().setParent(newRoot.getParent())    # removes NR from original place
+			self.virtualNode.virtualInit()
+			newRoot.getParent().setRight(newRoot.getLeft())
 
-			while rotationNode.getParent().getHeight() != -1:  # makes the rotations up self tree O(logm) m = size of self
-				rotationNode.checkForRotationNeed()
-				rotationNode = rotationNode.getParent()
+			newRoot.virtualInit()
+			newRoot.setHeight(0)
 
-		else:  # if self height < lst height
-			newRoot = lst.First()
+			self.rebalancing(mntcNode)
+			self.is_Rotation(mntcNode)
+
+			newRoot.setLeft(self.root)							# insert NR into root
 			newRoot.setRight(lst.root)
+			newRoot.setParent(self.virtualNode)
+			self.root.setParent(newRoot)
+			lst.root.setParent(newRoot)
+
+			self.rebalancing(mntcNode)  						# keeps height & size right
+			self.is_Rotation(mntcNode)                          # rotates only self
+
+
+			glide = False
+			while self.balancefactor(newRoot) != 0 and self.balancefactor(newRoot) != 1:
+				glide = True
+				newRoot.setLeft(newRoot.getLeft().getRight())
+
+			if glide:
+				oldRoot.setParent(self.virtualNode)
+
+				newRoot.setParent(newRoot.getLeft().getParent())  		#connects NR to his new place down lst
+				newRoot.getParent().setRight(newRoot)
+				newRoot.getLeft().setParent(newRoot)
+
+
+			self.rebalancing(newRoot)								# keeps height & size right
+			self.is_Rotation(newRoot)								# rotates the tree
+
+		elif self.root.getHeight() < lst.root.getHeight():
+			newRoot = lst.first()
+			mntcNode = newRoot.getParent()                          # will be used for maintance
+			oldRoot = lst.root
+
+			newRoot.getRight().setParent(newRoot.getParent())
+			self.virtualNode.virtualInit()
+			newRoot.getParent().setLeft(newRoot.getRight())
+
+			newRoot.virtualInit()
+			newRoot.setHeight(0)
+
+			self.rebalancing(mntcNode)
+			self.is_Rotation(mntcNode)
+
 			newRoot.setLeft(self.root)
-			lst.delete(0)
+			newRoot.setRight(lst.root)
+			newRoot.setParent(self.virtualNode)
+			self.root.setParent(newRoot)
+			lst.root.setParent(newRoot)
 
-			while abs(self.balancefactor(newRoot)) > 1:  # "glides" alone self until the height matches self's height complexity O(logm) m = size of self
-				if newRoot.balancefactor() > 0:
-					newRoot.setLeft(newRoot.getLeft().getRight())
-					if abs(self.balancefactor(newRoot)) < 1:
-						newRoot.setParent(newRoot.getLeft().getParent())
-						newRoot.getParent().setLeft(newRoot)
-				else:
-					newRoot.setRight(newRoot.getRight().getLeft())
-					if abs(self.balancefactor(newRoot)) > 1:
-						newRoot.setParent(newRoot.getRight().getParent())
-						newRoot.getParent().setLeft(newRoot)
+			self.rebalancing(mntcNode)
+			self.is_Rotation(mntcNode)
 
-			rotationNode = newRoot
+			glide = False
+			while self.balancefactor(newRoot) != 0 and self.balancefactor(newRoot) != -1:
+				glide = True
+				newRoot.setRight(newRoot.getRight().getLeft())
 
-			while rotationNode.getParent().getHeight() != -1:
-				rotationNode.checkForRotationNeed()
-				rotationNode = rotationNode.getParent()
+			if glide:
+				oldRoot.setParent(self.virtualNode)
 
+				newRoot.setParent(newRoot.getRight().getParent())
+				newRoot.getParent().setLeft(newRoot)
+				newRoot.getRight().setParent(newRoot)
+
+			self.rebalancing(newRoot)
+			self.is_Rotation(newRoot)
+
+		finalRoot = newRoot
+		while finalRoot.getParent().getHeight() != -1:
+			finalRoot = finalRoot.getParent()
+		self.root = finalRoot
+
+		self.max = lst.max
 		return diff
 
 	"""searches for a *value* in the list
@@ -815,31 +855,33 @@ class AVLTreeList(object):
 		return i
 
 
-"""
+
 ############
 ###TESTER###
 ############
-"""
+
 import random
 ABC = "abcdefghijklmnopqrstuvwxyz"
 Len = len(ABC)
 
-tree1 = AVLTreeList()                   # random tree
+tree1 = AVLTreeList()                   # random tree random size
 tree1.insert(0,"a")
-for i in range(2**10):
+k = random.randrange(0 ,2**10)
+for i in range(k):
     val = ABC[random.randrange(0, Len)]
     j = random.randrange(0, tree1.length())
     tree1.insert(j , val)
+
+
+tree2 = AVLTreeList()                   # random tree random size
+tree2.insert(0,"a")
+k = random.randrange(0 ,2**10)
+for i in range(k):
+    val = ABC[random.randrange(0, Len)]
+    j = random.randrange(0, tree2.length())
+    tree2.insert(j , val)
+
 print(tree1)
+print(tree2)
 
-for i in range(tree1.length()):
-	if range(0, tree1.length()) == 0:
-		tree1.delete(0)
-	else:
-		j = random.randrange(0, tree1.length())
 
-		tree1.delete(j)
-		print(tree1)
-		print(i)
-
-print("###random delete works###")
