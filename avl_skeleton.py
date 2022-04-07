@@ -423,6 +423,97 @@ class AVLTreeList(object):
 	def length(self):  								#finished
 		return self.root.getSize()
 
+	def spine(self, h, direct):
+		node = self.root
+		if direct == 'R':
+			while node.getHeight() > h:
+				node = node.getRight()
+		else:
+			while node.getHeight() > h:
+				node = node.getLeft()
+		return node
+
+	def join(self, x, tree2):
+
+		tree1 = self
+
+		if self.root.getSize() == 0:
+			tree2.insert(0, x.getValue())
+
+			tree2.rebalancing(x)
+			tree2.is_Rotation(x)
+			tree2.rebalancing(x)
+			return tree2
+
+		if tree2.root.getSize() == 0:
+			tree1.insert(tree1.root.getSize(), x.getValue())
+
+			tree1.rebalancing(x)
+			tree1.is_Rotation(x)
+			tree1.rebalancing(x)
+			return tree1
+
+
+		if tree1.getRoot().getHeight() == tree2.getRoot().getHeight():
+			tree = AVLTreeList()
+			tree.root = x
+			tree.root.setLeft(tree1.getRoot())
+			tree.root.setRight(tree2.getRoot())
+			tree.rebalancing(x)
+
+		if tree1.getRoot().getHeight() < tree2.getRoot().getHeight():
+			height = tree1.root.getHeight()
+			spine_node = tree2.spine(height, 'L')
+			spine_parent = spine_node.getParent()
+			tree1.root.setParent(x)
+			x.setLeft(tree1.root)
+			spine_node.setParent(x)
+			x.setRight(spine_node)
+			x.setParent(spine_parent)
+			spine_parent.setLeft(x)
+
+			tree2.rebalancing(x)
+			tree2.is_Rotation(x)
+			tree2.rebalancing(x)
+
+			return tree2
+
+		if tree1.getRoot().getHeight() > tree2.getRoot().getHeight():
+			height = tree2.root.getHeight()
+			spine_node = tree1.spine(height, 'R')
+			spine_parent = spine_node.getParent()
+			tree2.root.setParent(x)
+			x.setRight(tree2.root)
+			spine_node.setParent(x)
+			x.setLeft(spine_node)
+			x.setParent(spine_parent)
+			spine_parent.setRight(x)
+
+			tree1.rebalancing(x)
+			tree1.is_Rotation(x)
+			tree1.rebalancing(x)
+
+			return tree1
+
+		return tree
+
+	def get_min(self, node):
+		try:
+			while node.getLeft().getHeight() != -1:
+				node = node.getLeft
+			return node
+		except:
+			return 'F'
+
+	def get_max(self, node):
+		try:
+			while node.getRight().getHeight() != -1:
+				node = node.getRight
+			return node
+		except:
+			return 'F'
+
+
 	"""splits the list at the i'th index
 
 	@type i: int
@@ -432,8 +523,72 @@ class AVLTreeList(object):
 	@returns: a list [left, val, right], where left is an AVLTreeList representing the list until index i-1,
 	right is an AVLTreeList representing the list from index i+1, and val is the value at the i'th index.
 	"""
+
 	def split(self, i):
-		return None
+
+		split_list = [0, 0, 0]
+		x = self.retrieve(i)
+
+
+		left_tree = AVLTreeList()
+		right_tree = AVLTreeList()
+
+
+		if x == self.min:
+			right_tree = self
+			right_tree.delete(0)
+
+		elif x == self.max:
+			left_tree = self
+			left_tree.delete(self.root.size-1)
+
+		elif x == self.root:
+			left_tree = x.getLeft()
+			right_tree = x.getRight()
+
+		# x is right son not leaf
+		elif x.getParent().getRight() == x:
+			print("right son" + "\n")
+			connect_node = x.getParent()
+			D = AVLTreeList()
+			D.root = x.getLeft()
+			D.root.setParent(self.virtualNode)
+			D.max = D.root
+			D.min = D.root
+			C = AVLTreeList()
+			C.root = connect_node.getLeft()
+			C.root.setParent(self.virtualNode)
+			C.max = C.root
+			C.min = C.root
+			D = C.join(x.getParent(), D)
+
+			J = 0
+			while connect_node.getHeight() != -1:
+				min = self.get_min(D.root)
+				if min == 'F':
+					break
+				connect_node = self.Predecessor(min)
+				C = AVLTreeList()
+				C.root = connect_node.getLeft()
+				D = C.join(connect_node, D)
+				J += 1
+				if J > 1000:
+					break
+
+		# x is left son
+		elif x.getParent().getLeft() == x:
+			print("left son" + '\n')
+			D = AVLTreeList()
+			H = AVLTreeList()
+
+
+		split_list[0] = left_tree
+		split_list[1] = x
+		split_list[2] = right_tree
+
+
+		return split_list
+
 
 	"""concatenates lst to self
 
@@ -593,7 +748,7 @@ class AVLTreeList(object):
 			n = node
 			while n.getParent().getRight() != n:  ##Compexity O(logn)
 				n = n.getParent()
-			return n
+			return n.getParent()
 
 	""" maintance the fields of the tree from a node up to the root, returns the sum of changes
 	
@@ -777,7 +932,6 @@ class AVLTreeList(object):
 			print("")
 		return
 
-
 	def printree(self, t, bykey=False):
 		"""Print a textual representation of t
         bykey=True: show keys instead of values"""
@@ -852,28 +1006,13 @@ class AVLTreeList(object):
 ###TESTER###
 ############
 
-import random
-ABC = "abcdefghijklmnopqrstuvwxyz"
-Len = len(ABC)
-
-tree1 = AVLTreeList()                   # random tree random size
-tree1.insert(0,"a")
-k = random.randrange(0 ,2**10)
-for i in range(k):
-    val = ABC[random.randrange(0, Len)]
-    j = random.randrange(0, tree1.length())
-    tree1.insert(j , val)
-
-
-tree2 = AVLTreeList()                   # random tree random size
-tree2.insert(0,"a")
-k = random.randrange(0 ,2**10)
-for i in range(k):
-    val = ABC[random.randrange(0, Len)]
-    j = random.randrange(0, tree2.length())
-    tree2.insert(j , val)
+ABC = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+tree1 = AVLTreeList()
+for i in range(30):
+    tree1.insert(i , ABC[i])
+tree2 = AVLTreeList()
+for i in range(15):
+	tree2.insert(i, ABC[i])
 
 print(tree1)
-print(tree2)
-
 
