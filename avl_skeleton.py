@@ -4,7 +4,7 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-## update time == 07/04 14:00
+## update time == 07/04 15:00
 
 """A class represnting a node in an AVL tree"""
 
@@ -22,6 +22,8 @@ class AVLNode(object):
 		self.height = 0
 		self.size = 1
 
+	"""sets a node to be virtualNode
+	"""
 	def virtualInit(self):    ## init of the node to be inserted into the tree
 		self.left = self
 		self.right = self
@@ -104,7 +106,7 @@ class AVLNode(object):
 		self.value = value
 		return None
 
-	"""sets the balance factor of the node
+	"""sets the height of the node
 
 	@type h: int
 	@param h: the height
@@ -126,13 +128,10 @@ class AVLNode(object):
 	"""return the size of the node
 	
 	@rtype: int
-	@returns: the size of the node, None if virtual
+	@returns: the size of the node
 	"""
 	def getSize(self):
-		if self.isRealNode():
-			return self.size
-		else:
-			return 0
+		return self.size
 
 
 """
@@ -156,7 +155,8 @@ class AVLTreeList(object):
 		self.min = self.root     		  ##  both min & max points at the root
 		self.max = self.root
 
-
+	"""prints out the tree
+	"""
 	def __repr__(self):  # no need to understand the implementation of this one
 		out = ""
 		for row in self.printree(self.root):  # need printree.py file
@@ -189,14 +189,14 @@ class AVLTreeList(object):
 		len = self.length()
 		cnt = 0
 
-		while i >= 0:                                        ## complexity O(logn) the height of the tree
+		while i >= 0:                                        	# complexity O(logn) the height of the tree
 
 			cnt += 1
 			if cnt == len + 10:
-				return "retrieve while-loop didnt stopped"   ##Retrieve check 1
-			elif i < node.getLeft().getSize():
+				return "retrieve while-loop didnt stopped"   	# Retrieve check 1
+			elif i < node.getLeft().getSize():					# The node is in the left subtree
 				node = node.getLeft()
-			elif i > node.getLeft().getSize():
+			elif i > node.getLeft().getSize():					# The node is in the right subtree
 				i = i - 1 - node.getLeft().getSize()
 				node = node.getRight()
 			elif i == node.getLeft().getSize():
@@ -230,7 +230,7 @@ class AVLTreeList(object):
 
 			return 0
 
-		if i == self.length() or i ==0:   ## coplexcity O(1)
+		if i == self.length() or i ==0:   # if the node is going to be inserted in first or last
 			if i == self.length():			## places newNode at the end of the list
 				self.max.setRight(newNode)
 				newNode.setParent(self.max)
@@ -244,19 +244,17 @@ class AVLTreeList(object):
 		else:
 			oldNode = self.retrieve(i)  ## retrieves the i'th node - that is going to be replace, retrieve comlexity == O(logn)
 
-			if oldNode.getLeft().getHeight() == -1:
+			if oldNode.getLeft().getHeight() == -1: 		#if oldNode.left is a leaf, we insert to his left
 				oldNode.setLeft(newNode)
 				newNode.setParent(oldNode)
 
-			else:
-				oldNodePre = self.Predecessor(oldNode)  ## finds the Predecessor of oldNode, complexity O(logn)
+			else:											# oldNode is not a leaf, we inset to his predecessors right
+				oldNodePre = self.Predecessor(oldNode)      # finds the Predecessor of oldNode, complexity O(logn)
 				oldNodePre.setRight(newNode)
 				newNode.setParent(oldNodePre)
 
-		rebalancingCNT = self.rebalancing(newNode)
-
-		"""here the tree will be the check if the tree needs to rotate, and if, will rotate and return the number of balance actions (DNF coding rotating)"""
-		is_need_rotation = self.is_Rotation(newNode.getParent())
+		rebalancingCNT = self.rebalancing(newNode)          # keeps height & size feilds
+		is_need_rotation = self.is_Rotation(newNode.getParent())     # rotates the tree
 
 		return
 
@@ -272,12 +270,12 @@ class AVLTreeList(object):
 		if i == 0 and self.root.getHeight() == -1:  ## the tree is empty
 			return -1
 
-		node = self.retrieve(i)
-		root = False
+		node = self.retrieve(i)                      			# finds the node we are going to delete
+		root = False											# boolean that will be true if the node is the root
 		if self.root == node:
 			root = True
 
-		min = False
+		min = False												# booleans that will be true if the node is first or last
 		max = False
 		if self.first() == node or self.last() == node:
 			if self.first() == node:
@@ -285,47 +283,45 @@ class AVLTreeList(object):
 			else:
 				max = True
 
-		mntcNode = node.getParent()					## maintance node, will be used to maintance fields
-		if node.getHeight() == 0:  				    ## if node has no children, we erase him
+		mntcNode = node.getParent()					            # maintance node, will be used to maintance fields
+		if node.getHeight() == 0:  				    			# if node has no children, we delete him
 			if node == self.getRoot():
 				self.root = self.virtualNode
 				return -1
-			elif node.getParent().getRight() == node:
+			elif node.getParent().getRight() == node:			# node is a right child
 				node.getParent().setRight(self.virtualNode)
-			else:
+			else:												# node is a left child
 				node.getParent().setLeft(self.virtualNode)
 
 
 
-		elif node.getRight().getHeight() != -1:		## node has right son, we replace the node with his suc
+		elif node.getRight().getHeight() != -1:					# node has right son, we replace the node with his suc
 			sucNode = self.Succesor(node)
-			if node.getRight() == sucNode:          ## suc is right son of node
+			if node.getRight() == sucNode:          			# suc is right son of node
+				sucNode.setParent(node.getParent())          	# pointer change
 
-				sucNode.setParent(node.getParent())          ## pointer changes
 				if node.getParent().getRight() == node:
 					node.getParent().setRight(sucNode)
 				else:
 					node.getParent().setLeft(sucNode)
 
-				sucNode.setLeft(node.getLeft())
+				sucNode.setLeft(node.getLeft())					# maintaning the fields
 				node.getLeft().setParent(sucNode)
-
 				mntcNode = sucNode
 
-			else:                                   ## suc is not right son of node
+			else:                                   			# suc is not right son of node
 				sucNode.getRight().setParent(sucNode.getParent())
-				mntcNode = sucNode.getParent()
-				sucNode.getParent().setLeft(sucNode.getRight())        ## pointer chages
-
+				mntcNode = sucNode.getParent()					# maintance node, will be used to maintance fields
+				sucNode.getParent().setLeft(sucNode.getRight())       # pointer chages
 				sucNode.setParent(node.getParent())
-				if node.getParent().getRight() == node:
+
+				if node.getParent().getRight() == node:			# node is a right child
 					node.getParent().setRight(sucNode)
 				else:
-					node.getParent().setLeft(sucNode)
+					node.getParent().setLeft(sucNode)			# node is a left child
 
-				sucNode.setLeft(node.getLeft())
+				sucNode.setLeft(node.getLeft())					# maintaning the fields
 				node.getLeft().setParent(sucNode)
-
 				sucNode.setRight(node.getRight())
 				node.getRight().setParent(sucNode)
 
@@ -333,43 +329,39 @@ class AVLTreeList(object):
 				self.root = sucNode
 
 		else:
-			preNode = self.Predecessor(node)		## node has left son, we replace the vals of him and his Pred
-			if node.getLeft() == preNode:      		## pred is left son of node
-				preNode.setParent(node.getParent())  ## pointer changes
+			preNode = self.Predecessor(node)					# node doesnt have a left son, we replace the vals of him and his Pred
+			if node.getLeft() == preNode:      					# pred is left son of node
+				preNode.setParent(node.getParent())  			# pointer changes
 
-				if node.getParent().getRight() == node:
+				if node.getParent().getRight() == node:			#node is a right child
 					node.getParent().setRight(preNode)
-				else:
+				else:											# node is a left child
 					node.getParent().setLeft(preNode)
 
-				preNode.setRight(node.getRight())
+				preNode.setRight(node.getRight())				# maintaning the fields
 				node.getRight().setParent(preNode)
-
 				mntcNode = preNode
 
-			else:									## pred is not son if the node
+			else:												# pred is not son if the node
 				mntcNode = preNode.getParent()
-
-				preNode.getParent().setRight(preNodeNode.getLeft())  ## pointer chages
-
+				preNode.getParent().setRight(preNodeNode.getLeft())  # pointer chages
 				preNode.setParent(node.getParent())
-				if node.getParent().getLeft() == node:
+
+				if node.getParent().getLeft() == node:			#node is a left child
 					node.getParent().setLeft(preNode)
-				else:
+				else:											#node is a right child
 					node.getParent().setRight(preNode)
 
-				preNode.getLeft().setParent(preNode.getParent())
-
+				preNode.getLeft().setParent(preNode.getParent())	# maintaning the fields
 				preNode.setRight(node.getRight())
 				node.getRight().setParent(preNode)
-
 				preNode.setLeft(node.getLeft())
 				node.getLeft().setParent(preNode)
 
 			if root:
 				self.root = preNode
 
-		if min or max:
+		if min or max:											# if the node is deleted from last or first up update the fields
 			MMNode = self.getRoot()
 			if min:
 				while MMNode.getLeft().getHeight() != -1:
@@ -381,8 +373,8 @@ class AVLTreeList(object):
 				self.max = MMNode
 
 
-		node.virtualInit()  ##final deletion of the node
-		self.virtualNode.virtualInit()  ##resets the tree's virtual node in case it had pointers somewhere
+		node.virtualInit()  									#final deletion of the node
+		self.virtualNode.virtualInit()  						# resets the tree's virtual node in case it had pointers somewhere
 
 		rebalanceCNT = self.rebalancing(mntcNode)
 
@@ -413,7 +405,7 @@ class AVLTreeList(object):
 	@returns: a list of strings representing the data structure
 	"""
 	def listToArray(self):  						#finished
-		Array = []
+		Array = []									# creates the array we are going to return
 		node = self.min
 		i = 1
 		while i <= self.length():
