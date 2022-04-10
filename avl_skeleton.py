@@ -433,69 +433,69 @@ class AVLTreeList(object):
 				node = node.getLeft()
 		return node
 
-	def join(self, x, tree2):
+	def join(self, x, t):
 
-		tree1 = self
+		if self.root == None or t.root == None:
+			if self.root == None and t.root == None:
+				self.root = AVLNode(x.value)
+				return
+			elif self.root == None:
+				t.insert(0, x.value)
+				self.root = t.root
+				self.min = t.min
+				self.max = t.max
+				return
+			else:
+				self.insert(self.root.getSize(), x.value)
+				return
 
-		if self.root.getSize() == 0:
-			tree2.insert(0, x.getValue())
-
-			tree2.rebalancing(x)
-			tree2.is_Rotation(x)
-			tree2.rebalancing(x)
-			return tree2
-
-		if tree2.root.getSize() == 0:
-			tree1.insert(tree1.root.getSize(), x.getValue())
-
-			tree1.rebalancing(x)
-			tree1.is_Rotation(x)
-			tree1.rebalancing(x)
-			return tree1
-
-
-		if tree1.getRoot().getHeight() == tree2.getRoot().getHeight():
+		if self.root.getHeight() == t.root.getHeight():
 			tree = AVLTreeList()
 			tree.root = x
-			tree.root.setLeft(tree1.getRoot())
-			tree.root.setRight(tree2.getRoot())
-			tree.rebalancing(x)
+			tree.root.setLeft(self.getRoot())
+			tree.root.setRight(t.getRoot())
+			tree.max = t.max
+			tree.min = self.min
+			tree.root.setHeight(max(self.root.getHeight(), t.root.getHeight() + 1))
+			tree.root.size += 1
 
-		if tree1.getRoot().getHeight() < tree2.getRoot().getHeight():
-			height = tree1.root.getHeight()
-			spine_node = tree2.spine(height, 'L')
+			return tree
+
+		if self.root.getHeight() < t.root.getHeight():
+			height = self.root.getHeight()
+			spine_node = t.spine(height, 'L')
 			spine_parent = spine_node.getParent()
-			tree1.root.setParent(x)
-			x.setLeft(tree1.root)
+			self.root.setParent(x)
+			x.setLeft(self.root)
 			spine_node.setParent(x)
 			x.setRight(spine_node)
 			x.setParent(spine_parent)
 			spine_parent.setLeft(x)
 
-			tree2.rebalancing(x)
-			tree2.is_Rotation(x)
-			tree2.rebalancing(x)
+			t.rebalancing(x)
+			t.is_Rotation(x)
+			t.rebalancing(x)
 
-			return tree2
+			return t
 
-		if tree1.getRoot().getHeight() > tree2.getRoot().getHeight():
-			height = tree2.root.getHeight()
-			spine_node = tree1.spine(height, 'R')
+		if self.getRoot().getHeight() > self.getRoot().getHeight():
+			height = t.root.getHeight()
+			spine_node = self.spine(height, 'R')
 			spine_parent = spine_node.getParent()
-			tree2.root.setParent(x)
-			x.setRight(tree2.root)
+			t.root.setParent(x)
+			x.setRight(t.root)
 			spine_node.setParent(x)
 			x.setLeft(spine_node)
 			x.setParent(spine_parent)
 			spine_parent.setRight(x)
 
-			tree1.rebalancing(x)
-			tree1.is_Rotation(x)
-			tree1.rebalancing(x)
+			self.rebalancing(x)
+			self.is_Rotation(x)
+			self.rebalancing(x)
 
-			return tree1
+			return self
 
-		return tree
+		return
 
 	def get_min(self, node):
 		try:
@@ -527,65 +527,72 @@ class AVLTreeList(object):
 	def split(self, i):
 
 		split_list = [0, 0, 0]
-		x = self.retrieve(i)
-
+		split = self.retrieve(i)
 
 		left_tree = AVLTreeList()
 		right_tree = AVLTreeList()
 
+		if split.getLeft().getHeight() != -1:
+			left_tree.root = split.getLeft()
+			left_tree.min = split.getLeft()
+			left_tree.max = left_tree.root
+			left_tree.getRoot().setParent(self.virtualNode)
 
-		if x == self.min:
-			right_tree = self
-			right_tree.delete(0)
+		if split.getRight().getHeight() != -1:
+			right_tree.root = split.getRight()
+			right_tree.min = right_tree.root
+			right_tree.max = right_tree.root
+			right_tree.getRoot().setParent(self.virtualNode)
 
-		elif x == self.max:
-			left_tree = self
-			left_tree.delete(self.root.size-1)
+		split.setLeft(self.virtualNode)
+		split.setRight(self.virtualNode)
+		current = split
+		while (current.getParent().getHeight() != -1):
+			parent = current.getParent()
+			if (parent.getRight() == current):
+				connect = AVLNode(parent.getValue())
+				subLeft = AVLTreeList()
+				if (parent.getLeft().getHeight() != -1):
+					subLeft.root = parent.getLeft()
+					subLeft.min = subLeft.root
+					subLeft.max = subLeft.root
+					subLeft.root.setParent(self.virtualNode)
+					parent.getLeft().setParent(parent)
+				left_tree = left_tree.join(connect, subLeft)
+			else:
+				connect = AVLNode(parent.getValue())
+				subRight = AVLTreeList()
+				if (parent.getRight().getHeight() != -1):
+					subRight.root = parent.getRight()
+					subRight.min = subRight.root
+					subRight.max = subRight.root
+					subRight.getRoot().setParent(self.virtualNode)
+					parent.setRight(self.virtualNode)
+					parent.getRight().setParent(parent)
+				right_tree = right_tree.join(connect, subRight)
+			current = current.getParent()
 
-		elif x == self.root:
-			left_tree = x.getLeft()
-			right_tree = x.getRight()
 
-		# x is right son not leaf
-		elif x.getParent().getRight() == x:
-			print("right son" + "\n")
-			connect_node = x.getParent()
-			D = AVLTreeList()
-			D.root = x.getLeft()
-			D.root.setParent(self.virtualNode)
-			D.max = D.root
-			D.min = D.root
-			C = AVLTreeList()
-			C.root = connect_node.getLeft()
-			C.root.setParent(self.virtualNode)
-			C.max = C.root
-			C.min = C.root
-			D = C.join(x.getParent(), D)
+		split.setParent(self.virtualNode)
+		split.size = 1
+		split.setHeight(0)
+		self.min = split
+		self.max = split
+		left_tree.min = left_tree.get_min(left_tree.root)
+		left_tree.max = left_tree.get_max(left_tree.root)
+		right_tree.min = right_tree.get_min(right_tree.root)
+		right_tree.max = right_tree.get_max(right_tree.root)
 
-			J = 0
-			while connect_node.getHeight() != -1:
-				min = self.get_min(D.root)
-				if min == 'F':
-					break
-				connect_node = self.Predecessor(min)
-				C = AVLTreeList()
-				C.root = connect_node.getLeft()
-				D = C.join(connect_node, D)
-				J += 1
-				if J > 1000:
-					break
 
-		# x is left son
-		elif x.getParent().getLeft() == x:
-			print("left son" + '\n')
-			D = AVLTreeList()
-			H = AVLTreeList()
-
+		print("FINAL" + "\n")
+		print("left tree:")
+		print(left_tree)
+		print("right tree:")
+		print(right_tree)
 
 		split_list[0] = left_tree
-		split_list[1] = x
+		split_list[1] = split.getValue()
 		split_list[2] = right_tree
-
 
 		return split_list
 
@@ -1016,3 +1023,4 @@ for i in range(15):
 
 print(tree1)
 
+tree1.split(5)
