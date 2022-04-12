@@ -4,7 +4,7 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-## update time == 07/04 15:00
+## update time == 12/4 2000
 
 """A class represnting a node in an AVL tree"""
 
@@ -598,8 +598,19 @@ class AVLTreeList(object):
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
 	def concat(self, lst):
-		diff = abs(self.root.getHeight() - lst.getRoot().getHeight())
+		if self.empty() and lst.empty():
+			return 0
+		if self.empty():
+			self.root = lst.root
+			self.virtualNode = lst.virtualNode
+			self.min = lst.min
+			self.min = lst.max
+			return lst.root.getHeight()
+		if lst.empty():
+			return self.root.getHeight()
 
+
+		diff = abs(self.root.getHeight() - lst.getRoot().getHeight())
 
 		if self.root.getHeight() >= lst.root.getHeight():
 			newRoot = self.last()
@@ -1005,14 +1016,27 @@ class AVLTreeList(object):
 ############
 ###TESTER###
 ############
+import random
+ABC = "abcdefghijklmnopqrstuvwxyz"
+Len = len(ABC)
+
+tree1 = AVLTreeList()                   # random tree random size
+tree1.insert(0,"a")
+k = random.randrange(0 ,2**10)
+for i in range(k):
+    val = ABC[random.randrange(0, Len)]
+    j = random.randrange(0, tree1.length())
+    tree1.insert(j , val)
 
 ABC = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
-tree1 = AVLTreeList()
-for i in range(30):
-    tree1.insert(i , ABC[i])
 tree2 = AVLTreeList()
-for i in range(15):
-	tree2.insert(i, ABC[i])
 
 print(tree1)
+print(tree2)
+
+tree2.concat(tree1)
+
+print(tree2)
+
+print(tree2.getRoot().getValue())
 
