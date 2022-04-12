@@ -133,6 +133,14 @@ class AVLNode(object):
 	def getSize(self):
 		return self.size
 
+	"""Set all node fields by given
+		@type value: str
+		@type left, right, parent: AVLNode
+		@type height, size: int
+		@param value: data of your node
+		"""
+
+
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -497,23 +505,6 @@ class AVLTreeList(object):
 
 		return tree
 
-	def get_min(self, node):
-		try:
-			while node.getLeft().getHeight() != -1:
-				node = node.getLeft
-			return node
-		except:
-			return 'F'
-
-	def get_max(self, node):
-		try:
-			while node.getRight().getHeight() != -1:
-				node = node.getRight
-			return node
-		except:
-			return 'F'
-
-
 	"""splits the list at the i'th index
 
 	@type i: int
@@ -598,34 +589,46 @@ class AVLTreeList(object):
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
 	def concat(self, lst):
+
+		if self.empty():
+			self = lst
+			return self.root.getHeight()
+		elif lst.empty():
+			return self.root.getHeight()
+
 		diff = abs(self.root.getHeight() - lst.getRoot().getHeight())
 
+		height1IsBigger = True
+		if self.root.getHeight() < lst.root.getHeight():
+			height1IsBigger = False
 
-		if self.root.getHeight() >= lst.root.getHeight():
-			newRoot = self.last()
-			mntcNode = newRoot.getParent()						# will be used for maintance
-			oldRoot = self.root
+		newRoot = self.last()
+		mntcNode = newRoot.getParent()						# will be used for maintance
 
-			newRoot.getLeft().setParent(newRoot.getParent())    # removes NR from original place
-			self.virtualNode.virtualInit()
-			newRoot.getParent().setRight(newRoot.getLeft())
+		oldRoot = self.root
+		if not height1IsBigger:
+			oldRoot = lst.root
 
-			newRoot.virtualInit()
-			newRoot.setHeight(0)
+		newRoot.getLeft().setParent(newRoot.getParent())    # removes NR from original place
+		self.virtualNode.virtualInit()
+		newRoot.getParent().setRight(newRoot.getLeft())
 
-			self.rebalancing(mntcNode)
-			self.is_Rotation(mntcNode)
+		newRoot.virtualInit()
+		newRoot.setHeight(0)
 
-			newRoot.setLeft(self.root)							# insert NR into root
-			newRoot.setRight(lst.root)
-			newRoot.setParent(self.virtualNode)
-			self.root.setParent(newRoot)
-			lst.root.setParent(newRoot)
+		self.rebalancing(mntcNode)
+		self.is_Rotation(mntcNode)
 
-			self.rebalancing(mntcNode)  						# keeps height & size right
-			self.is_Rotation(mntcNode)                          # rotates only self
+		newRoot.setLeft(self.root)							# insert NR into root
+		newRoot.setRight(lst.root)
+		newRoot.setParent(self.virtualNode)
+		self.root.setParent(newRoot)
+		lst.root.setParent(newRoot)
 
+		self.rebalancing(mntcNode)  						# keeps height & size right
+		self.is_Rotation(mntcNode)                          # rotates only self
 
+		if height1IsBigger:
 			glide = False
 			while self.balancefactor(newRoot) != 0 and self.balancefactor(newRoot) != 1:
 				glide = True
@@ -642,30 +645,7 @@ class AVLTreeList(object):
 			self.rebalancing(newRoot)								# keeps height & size right
 			self.is_Rotation(newRoot)								# rotates the tree
 
-		elif self.root.getHeight() < lst.root.getHeight():
-			newRoot = lst.first()
-			mntcNode = newRoot.getParent()                          # will be used for maintance
-			oldRoot = lst.root
-
-			newRoot.getRight().setParent(newRoot.getParent())
-			self.virtualNode.virtualInit()
-			newRoot.getParent().setLeft(newRoot.getRight())
-
-			newRoot.virtualInit()
-			newRoot.setHeight(0)
-
-			self.rebalancing(mntcNode)
-			self.is_Rotation(mntcNode)
-
-			newRoot.setLeft(self.root)
-			newRoot.setRight(lst.root)
-			newRoot.setParent(self.virtualNode)
-			self.root.setParent(newRoot)
-			lst.root.setParent(newRoot)
-
-			self.rebalancing(mntcNode)
-			self.is_Rotation(mntcNode)
-
+		elif not height1IsBigger:
 			glide = False
 			while self.balancefactor(newRoot) != 0 and self.balancefactor(newRoot) != -1:
 				glide = True
@@ -1005,14 +985,135 @@ class AVLTreeList(object):
 ############
 ###TESTER###
 ############
+######################################## Put these functions ########################################
+##################################### inside AVLTreeList class ######################################
 
-ABC = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
-tree1 = AVLTreeList()
-for i in range(30):
-    tree1.insert(i , ABC[i])
-tree2 = AVLTreeList()
-for i in range(15):
-	tree2.insert(i, ABC[i])
+"""Checks if the AVL tree properties are consistent
 
-print(tree1)
+@rtype: boolean 
+@returns: True if the AVL tree properties are consistent
+"""
+def check(self):
+    if not self.isAVL():
+        print("The tree is not an AVL tree!")
+    if not self.isSizeConsistent():
+        print("The sizes of the tree nodes are inconsistent!")
+    if not self.isHeightConsistent():
+        print("The heights of the tree nodes are inconsistent!")
+    if not self.isRankConsistent():
+        print("The ranks of the tree nodes are inconsistent!")
 
+"""Checks if the tree is an AVL
+
+@rtype: boolean 
+@returns: True if the tree is an AVL tree
+"""
+def isAVL(self):
+    return self.isAVLRec(self.getRoot())
+
+"""Checks if the subtree is an AVL
+@type x: AVLNode
+@param x: The root of the subtree
+@rtype: boolean 
+@returns: True if the subtree is an AVL tree
+"""
+def isAVLRec(self, x):
+    # If x is a virtual node return True
+    if x == self.getSentinel():
+        return True
+    # Check abs(balance factor) <= 1
+    bf = x.balanceFactor()
+    if bf > 1 or bf < -1:
+        return False
+    # Recursive calls
+    return self.isAVLRec(x.getLeft()) and self.isAVLRec(x.getRight())
+
+"""Checks if sizes of the nodes in the tree are consistent
+
+@rtype: boolean 
+@returns: True if sizes of the nodes in the tree are consistent
+"""
+def isSizeConsistent(self):
+    return self.isSizeConsistentRec(self.getRoot())
+
+"""Checks if sizes of the nodes in the subtree are consistent
+
+@type x: AVLNode
+@param x: The root of the subtree
+@rtype: boolean 
+@returns: True if sizes of the nodes in the subtree are consistent
+"""
+def isSizeConsistentRec(self, x):
+    # If x is a virtual node return True
+    if x == self.getSentinel():
+        return True
+    # Size of x should be x.left.size + x.right.size + 1
+    if x.getSize() != (x.getLeft().getSize() + x.getRight().getSize() + 1):
+        return False
+    # Recursive calls
+    return self.isSizeConsistentRec(x.getLeft()) and self.isSizeConsistentRec(x.getRight())
+
+"""Checks if heights of the nodes in the tree are consistent
+
+@rtype: boolean 
+@returns: True if heights of the nodes in the tree are consistent
+"""
+def isHeightConsistent(self):
+    return self.isHeightConsistentRec(self.getRoot())
+
+"""Checks if heights of the nodes in the subtree are consistent
+
+@type x: AVLNode
+@param x: The root of the subtree
+@rtype: boolean 
+@returns: True if heights of the nodes in the subtree are consistent
+"""
+def isHeightConsistentRec(self, x):
+    # If x is a virtual node return True
+    if x == self.getSentinel():
+        return True
+    # Height of x should be maximum of children heights + 1
+    if x.getHeight() != max(x.getLeft().getHeight(), x.getRight().getHeight()) + 1:
+        return False
+    # Recursive calls
+    return self.isSizeConsistentRec(x.getLeft()) and self.isSizeConsistentRec(x.getRight())
+
+"""Checks if the ranks of the nodes in the tree are consistent
+
+@returns: True if the ranks of the nodes in the tree are consistent
+"""
+def isRankConsistent(self):
+    root = self.getRoot()
+    for i in range(1, root.getSize()):
+        if i != self.rank(self.select(i)):
+            return False
+    nodesList = self.nodes()
+    for node in nodesList:
+        if node != self.select(self.rank(node)):
+            return False
+    return True
+
+"""Returns a list of the nodes in the tree sorted by index in O(n)
+
+@rtype: list
+@returns: A list of the nodes in the tree sorted by index
+"""
+def nodes(self):
+    lst = []
+    self.nodesInOrder(self.getRoot(), lst)
+    return lst
+
+"""Adds the nodes in the subtree to the list
+ following an in-order traversal in O(n)
+
+@type x: AVLNode
+@type lst: list
+@param x: The root of the subtree
+@param lst: The list
+"""
+def nodesInOrder(self, x, lst):
+    if not x.isRealNode():
+        return
+    self.nodesInOrder(x.getLeft(), lst)
+    lst.append(x)
+    self.nodesInOrder(x.getRight(), lst)
