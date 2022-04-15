@@ -414,7 +414,7 @@ class AVLTreeList(object):
 	def length(self):
 		return self.root.getSize()
 
-	"""returns the connection of 2 trees with one node
+	"""returns the connection of 2 trees with one node O(logh)
 
 	@rtype: AVLTreeList
 	@returns: the taller tree connected to the lower tree
@@ -518,7 +518,7 @@ class AVLTreeList(object):
 				node = node.getRight()
 		return node
 
-	"""splits the list at the i'th index
+	"""splits the list at the i'th index, O(logn)
 
 	@type i: int
 	@pre: 0 <= i < self.length()
