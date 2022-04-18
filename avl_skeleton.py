@@ -439,9 +439,19 @@ class AVLTreeList(object):
 	right is an AVLTreeList representing the list from index i+1, and val is the value at the i'th index.
 	"""
 	def split(self, i):
+
 		splinter = self.retrieveNode(i)				# splinter is the intended node in the list according to whom we split
 		rightTree = AVLTreeList()
 		leftTree = AVLTreeList()
+		if i == 0:
+			self.delete(0)
+			rightTree = self
+			split_list = []
+			split_list.append(leftTree)
+			split_list.append(splinter.getValue())
+			split_list.append(rightTree)
+			return split_list
+
 		# if splinter have left son build left tree
 		if splinter.getLeft().getHeight() != -1:
 			leftTree.root = splinter.getLeft()
@@ -853,6 +863,7 @@ class AVLTreeList(object):
 						cnt += 2
 				node = node.getParent()
 		return cnt
+
 ###############################
 ##### from here only repr #####
 ###############################
@@ -991,6 +1002,8 @@ class AVLTreeList(object):
 			tree.root.setRight(tree2.getRoot())
 			tree.rebalancing(x)
 
+			return tree
+
 		if tree1.getRoot().getHeight() < tree2.getRoot().getHeight():
 			height = tree1.root.getHeight()
 			spine_node = tree2.spine(height, 'L')
@@ -1025,26 +1038,22 @@ class AVLTreeList(object):
 
 			return tree1
 
-		return tree
+		return None
 
-	def get_min(self, node):
-		try:
-			while node.getLeft().getHeight() != -1:
-				node = node.getLeft
-			return node
-		except:
-			return 'F'
+	def get_min(self):
+		node = self.root
+		while node.getLeft().getHeight() != -1:
+			node = node.getLeft()
+		return node
 
-	def get_max(self, node):
-		try:
-			while node.getRight().getHeight() != -1:
-				node = node.getRight
-			return node
-		except:
-			return 'F'
-
+	def get_max(self):
+		node = self.root
+		while node.getRight().getHeight() != -1:
+			node = node.getRight()
+		return node
 
 
 ############
 ###TESTER###
 ############
+
