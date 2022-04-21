@@ -895,6 +895,8 @@ class AVLTreeList(object):
 			tree2.rebalancing(x)
 			tree2.is_Rotation(x)
 			tree2.rebalancing(x)
+			tree2.min = tree2.get_min()
+			tree2.max = tree2.get_max()
 			return tree2
 
 		if tree2.root.getSize() == 0:
@@ -903,6 +905,32 @@ class AVLTreeList(object):
 			tree1.rebalancing(x)
 			tree1.is_Rotation(x)
 			tree1.rebalancing(x)
+			tree1.min = tree1.get_min()
+			tree1.max = tree1.get_max()
+			return tree1
+
+		if self.root.getSize() == 1:
+			tree2.insert(0, x.getValue())
+			tree2.insert(0, tree1.root.getValue())
+
+			tree2.rebalancing(x)
+			tree2.is_Rotation(x)
+			tree2.rebalancing(x)
+			tree2.min = tree2.get_min()
+			tree2.max = tree2.get_max()
+
+			return tree2
+
+		if tree2.root.getSize() == 1:
+			tree1.insert(tree1.root.getSize(), x.getValue())
+			tree1.insert(tree1.root.getSize(), tree2.root.getValue())
+
+			tree1.rebalancing(x)
+			tree1.is_Rotation(x)
+			tree1.rebalancing(x)
+			tree1.min = tree1.get_min()
+			tree1.max = tree1.get_max()
+
 			return tree1
 
 
@@ -912,6 +940,8 @@ class AVLTreeList(object):
 			tree.root.setLeft(tree1.getRoot())
 			tree.root.setRight(tree2.getRoot())
 			tree.rebalancing(x)
+			tree.min = tree.get_min()
+			tree.max = tree.get_max()
 
 			return tree
 
@@ -929,6 +959,8 @@ class AVLTreeList(object):
 			tree2.rebalancing(x)
 			tree2.is_Rotation(x)
 			tree2.rebalancing(x)
+			tree2.min = tree2.get_min()
+			tree2.max = tree2.get_max()
 
 			return tree2
 
@@ -946,6 +978,8 @@ class AVLTreeList(object):
 			tree1.rebalancing(x)
 			tree1.is_Rotation(x)
 			tree1.rebalancing(x)
+			tree1.min = tree1.get_min()
+			tree1.max = tree1.get_max()
 
 			return tree1
 
@@ -1072,6 +1106,8 @@ class AVLTreeList(object):
 		while row[i] == " ":
 			i += 1
 		return i
+
+
 
 
 #########################################
