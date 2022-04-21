@@ -4,7 +4,7 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-## update time == 20/04 1500
+## update time == 1930    21/4
 
 """A class represnting a node in an AVL tree"""
 
@@ -252,8 +252,8 @@ class AVLTreeList(object):
 				oldNodePre.setRight(newNode)
 				newNode.setParent(oldNodePre)
 
-		cnt += self.rebalancing(newNode)          			# keeps height & size feilds
-		cnt += self.is_Rotation(newNode.getParent())     	# rotates the tree
+
+		cnt += self.is_Rotation(newNode)     	# rotates the tree
 
 		return cnt
 
@@ -726,6 +726,56 @@ class AVLTreeList(object):
 
 		return cnt
 
+	def newRebalancing(self,node):
+
+		h = max(node.getLeft().getHeight(), node.getRight().getHeight()) + 1    # computes only for the node itself
+		s = node.getLeft().getSize() + 1 + node.getRight().getSize()
+		oldH = node.getHeight()
+		node.setHeight(h)
+		node.size = s
+		if oldH != node.getHeight():												# height is changed
+			return True
+		return False
+
+	""" the function check if the tree need rotations, from the specific node to the root, and return the number of balancing actions
+	    """
+	def is_Rotation(self, node):
+
+		cnt = 0
+		while node.getHeight() != -1:
+			heightChanged = self.newRebalancing(node)
+
+			bf = self.balancefactor(node)  ## check the balance factor of the node
+
+			## if the bf is OK continue to the parent until u reach to the root
+			if (abs(bf) < 2):
+				if heightChanged:
+					cnt += 1
+
+
+			## the bf is not OK, so do one of the rotations
+			else:
+				if (bf == -2):
+					if ((self.balancefactor(node.getRight())) == -1 or (self.balancefactor(node.getRight())) == 0):
+						## bf of right son is -1
+						self.left_rotation(node)
+						cnt += 1
+					else:
+						## bf of right son is +1
+						self.right_left_rotation(node)
+						cnt += 2
+				elif (bf == 2):
+					if (self.balancefactor(node.getLeft()) == 1) or (self.balancefactor(node.getLeft()) == 0):
+						## bf of left son is +1
+						self.right_rotation(node)
+						cnt += 1
+					else:
+						## bf of left son is -1
+						self.left_right_rotation(node)
+						cnt += 2
+			node = node.getParent()
+		return cnt
+
 	""" computes the balance factor of a given node
 	
 	@rtype: int
@@ -767,7 +817,7 @@ class AVLTreeList(object):
 		else:
 			self.root = B
 		self.virtualNode.virtualInit()
-		self.rebalancing(C)
+		self.newRebalancing(C)
 		return
 
 	""" right rotation (BF = +2 and BF OF LEFT SON = +1)
@@ -803,7 +853,7 @@ class AVLTreeList(object):
 		else:
 			self.root = B
 		self.virtualNode.virtualInit()
-		self.rebalancing(C)
+		self.newRebalancing(C)
 		return
 
 	""" left then right rotation (BF = +2 and BF OF LEFT SON = -1)
@@ -834,41 +884,6 @@ class AVLTreeList(object):
 		self.left_rotation(A)  ## rotation left of A, B
 		return
 
-	""" the function check if the tree need rotations, from the specific node to the root, and return the number of balancing actions
-    """
-	def is_Rotation(self, node):
-
-		cnt = 0
-		while node.getHeight() != -1:
-
-			bf = self.balancefactor(node)  ## check the balance factor of the node
-
-			## if the bf is OK continue to the parent until u reach to the root
-			if (abs(bf) < 2):
-				node = node.getParent()
-
-			## the bf is not OK, so do one of the rotations
-			else:
-				if (bf == -2):
-					if ((self.balancefactor(node.getRight())) == -1 or (self.balancefactor(node.getRight())) == 0):
-						## bf of right son is -1
-						self.left_rotation(node)
-						cnt += 1
-					else:
-						## bf of right son is +1
-						self.right_left_rotation(node)
-						cnt += 2
-				elif (bf == 2):
-					if (self.balancefactor(node.getLeft()) == 1) or (self.balancefactor(node.getLeft()) == 0):
-						## bf of left son is +1
-						self.right_rotation(node)
-						cnt += 1
-					else:
-						## bf of left son is -1
-						self.left_right_rotation(node)
-						cnt += 2
-				node = node.getParent()
-		return cnt
 
 	def join(self, x, tree2):
 
@@ -1057,3 +1072,14 @@ class AVLTreeList(object):
 		while row[i] == " ":
 			i += 1
 		return i
+
+
+#########################################
+t = AVLTreeList()
+for i in range(10):
+	t.insert(i,i)
+print(t)
+lst = t.split(5)
+
+print(lst[0])
+print(lst[2])
