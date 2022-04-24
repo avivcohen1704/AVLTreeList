@@ -449,7 +449,7 @@ class AVLTreeList(object):
 		splinter = self.retrieveNode(i)				# splinter is the intended node in the list according to whom we split
 		rightTree = AVLTreeList()
 		leftTree = AVLTreeList()
-		if i == 0:
+		if i == 0:						# splinter is the first node
 			self.delete(0)
 			rightTree = self
 			split_list = []
@@ -458,26 +458,25 @@ class AVLTreeList(object):
 			split_list.append(rightTree)
 			return split_list
 
-		# if splinter have left son build left tree
-		if splinter.getLeft().getHeight() != -1:
+		if splinter.getLeft().getHeight() != -1:		# if splinter have left son build left tree
 			leftTree.root = splinter.getLeft()
 			leftTree.min = leftTree.get_min()
 			leftTree.max = leftTree.get_max()
-			leftTree.root.setParent(self.virtualNode)		# separate the subtree from the original tree
-		# if splinter have right son build right tree
-		if splinter.getRight().getHeight() != -1:
+			leftTree.root.setParent(self.virtualNode)	# separate the subtree from the original tree
+		
+		if splinter.getRight().getHeight() != -1:		# if splinter have right son build right tree
 			rightTree.root = splinter.getRight()
 			rightTree.min = rightTree.get_min()
 			rightTree.max = rightTree.get_max()
-			rightTree.root.setParent(self.virtualNode)		# separate the subtree from the original tree
+			rightTree.root.setParent(self.virtualNode)	# separate the subtree from the original tree
 		splinter.setLeft(self.virtualNode)
 		splinter.setRight(self.virtualNode)
 		current = splinter
 		while current.getParent().getHeight() != -1:
 			parent = current.getParent()
-			# current is the right son
-			if parent.getRight() == current:
-				connector = AVLNode(parent.getValue())		# the node we want to connect with
+			
+			if parent.getRight() == current:		# current is the right son
+				connector = AVLNode(parent.getValue())	# the node we want to connect with
 				connector.setParent(self.virtualNode)
 				connector.setLeft(self.virtualNode)
 				connector.setRight(self.virtualNode)
@@ -488,10 +487,10 @@ class AVLTreeList(object):
 					subLeft.max = subLeft.get_max()
 					subLeft.root.setParent(self.virtualNode)
 					parent.setLeft(self.virtualNode)
-				# joining subtree with left tree by connector
-				leftTree = subLeft.join(connector, leftTree)
-			# current is the left son
-			else:
+				
+				leftTree = subLeft.join(connector, leftTree)	# joining subtree with left tree by connector
+			
+			else:							# current is the left son
 				connector = AVLNode(parent.getValue())		# the node we want to connect with
 				connector.setParent(self.virtualNode)
 				connector.setLeft(self.virtualNode)
@@ -503,14 +502,16 @@ class AVLTreeList(object):
 					subRight.max = subRight.get_max()
 					subRight.root.setParent(self.virtualNode)
 					parent.setRight(self.virtualNode)
-				# joining subtree with right tree by connector
-				rightTree = rightTree.join(connector, subRight)
+				
+				rightTree = rightTree.join(connector, subRight)	# joining subtree with right tree by connector
 			current = current.getParent()
+		
 		# updating min/max at the new trees
 		leftTree.min = leftTree.get_min()
 		leftTree.max = leftTree.get_max()
 		rightTree.min = rightTree.get_min()
 		rightTree.max = rightTree.get_max()
+		
 		# creating the return list and adding the trees to the list, with splinter
 		split_list = []
 		split_list.append(leftTree)
@@ -884,89 +885,100 @@ class AVLTreeList(object):
 		self.left_rotation(A)  ## rotation left of A, B
 		return
 
-
+	""" joining 2 trees with node, saving the heights of the trees
+	
+	@rtype: AVLTree
+	@returns: tree that built from 2 trees and node
+	"""
 	def join(self, x, tree2):
 
 		tree1 = self
 
-		if self.root.getSize() == 0:
+		if self.root.getSize() == 0:					# if left tree is virtual node
 			tree2.insert(0, x.getValue())
-
+				
+			# Maintaining size and height, doing rotaions if needed
 			tree2.rebalancing(x)
 			tree2.is_Rotation(x)
 			tree2.rebalancing(x)
-			tree2.min = tree2.get_min()
-			tree2.max = tree2.get_max()
+			tree2.min = tree2.get_min()	# update min
+			tree2.max = tree2.get_max()	# update max
 			return tree2
 
-		if tree2.root.getSize() == 0:
+		if tree2.root.getSize() == 0:					# if right tree is virtual node
 			tree1.insert(tree1.root.getSize(), x.getValue())
-
+			
+			# Maintaining size and height, doing rotaions if needed
 			tree1.rebalancing(x)
 			tree1.is_Rotation(x)
 			tree1.rebalancing(x)
-			tree1.min = tree1.get_min()
-			tree1.max = tree1.get_max()
+			tree1.min = tree1.get_min()	# update min
+			tree1.max = tree1.get_max()	# update max
 			return tree1
 
-		if self.root.getSize() == 1:
+		if self.root.getSize() == 1:					# if left tree is just one node
 			tree2.insert(0, x.getValue())
 			tree2.insert(0, tree1.root.getValue())
-
+			
+			# Maintaining size and height, doing rotaions if needed
 			tree2.rebalancing(x)
 			tree2.is_Rotation(x)
 			tree2.rebalancing(x)
-			tree2.min = tree2.get_min()
-			tree2.max = tree2.get_max()
+			tree2.min = tree2.get_min()	# update min
+			tree2.max = tree2.get_max()	# update max
 
 			return tree2
 
-		if tree2.root.getSize() == 1:
+		if tree2.root.getSize() == 1:					# if right tree is just one node
 			tree1.insert(tree1.root.getSize(), x.getValue())
 			tree1.insert(tree1.root.getSize(), tree2.root.getValue())
-
+			
+			# Maintaining size and height, doing rotaions if needed
 			tree1.rebalancing(x)
 			tree1.is_Rotation(x)
 			tree1.rebalancing(x)
-			tree1.min = tree1.get_min()
-			tree1.max = tree1.get_max()
+			tree1.min = tree1.get_min()	# update min
+			tree1.max = tree1.get_max()	# update max
 
 			return tree1
 
 
-		if tree1.getRoot().getHeight() == tree2.getRoot().getHeight():
+		if tree1.getRoot().getHeight() == tree2.getRoot().getHeight():	# if the trees height are equal 
 			tree = AVLTreeList()
 			tree.root = x
 			tree.root.setLeft(tree1.getRoot())
 			tree.root.setRight(tree2.getRoot())
+			
+			# Maintaining size and height, doing rotaions if needed
 			tree.rebalancing(x)
-			tree.min = tree.get_min()
-			tree.max = tree.get_max()
+			tree.min = tree.get_min()	# update min
+			tree.max = tree.get_max()	# update max
 
 			return tree
 
-		if tree1.getRoot().getHeight() < tree2.getRoot().getHeight():
+		if tree1.getRoot().getHeight() < tree2.getRoot().getHeight():	# if the left tree is taller
 			height = tree1.root.getHeight()
 			spine_node = tree2.spine(height, 'L')
-			spine_parent = spine_node.getParent()
+			spine_parent = spine_node.getParent()			# finding spine node
 			tree1.root.setParent(x)
 			x.setLeft(tree1.root)
 			spine_node.setParent(x)
 			x.setRight(spine_node)
 			x.setParent(spine_parent)
 			spine_parent.setLeft(x)
-
+			
+			# Maintaining size and height, doing rotaions if needed
 			tree2.rebalancing(x)
 			tree2.is_Rotation(x)
 			tree2.rebalancing(x)
-			tree2.min = tree2.get_min()
-			tree2.max = tree2.get_max()
+			tree2.min = tree2.get_min()	# update min
+			tree2.max = tree2.get_max()	# update max
 
 			return tree2
 
-		if tree1.getRoot().getHeight() > tree2.getRoot().getHeight():
+		if tree1.getRoot().getHeight() > tree2.getRoot().getHeight():	# if the right tree is taller
 			height = tree2.root.getHeight()
-			spine_node = tree1.spine(height, 'R')
+			spine_node = tree1.spine(height, 'R')			# finding spine node
 			spine_parent = spine_node.getParent()
 			tree2.root.setParent(x)
 			x.setRight(tree2.root)
@@ -974,35 +986,51 @@ class AVLTreeList(object):
 			x.setLeft(spine_node)
 			x.setParent(spine_parent)
 			spine_parent.setRight(x)
-
+			
+			# Maintaining size and height, doing rotaions if needed
 			tree1.rebalancing(x)
 			tree1.is_Rotation(x)
 			tree1.rebalancing(x)
-			tree1.min = tree1.get_min()
-			tree1.max = tree1.get_max()
+			tree1.min = tree1.get_min()	# update min
+			tree1.max = tree1.get_max()	# update max
 
 			return tree1
 
 		return None
-
+	
+	""" get the minimum of the tree
+	
+	@rtype: node
+	@returns: the minimum node of the tree
+	"""
 	def get_min(self):
 		node = self.root
 		while node.getLeft().getHeight() != -1:
 			node = node.getLeft()
 		return node
-
+	
+	""" get the maximum of the tree
+	
+	@rtype: node
+	@returns: the maximum node of the tree
+	"""
 	def get_max(self):
 		node = self.root
 		while node.getRight().getHeight() != -1:
 			node = node.getRight()
 		return node
-
+	
+	""" get the spine node of the tree bu height, for joining two trees
+	
+	@rtype: node
+	@returns: the spine node
+	"""
 	def spine(self, h, direct):
 		node = self.root
-		if direct == 'R':
+		if direct == 'R':			# searching by right side of the tree
 			while node.getHeight() > h:
 				node = node.getRight()
-		else:
+		else:					# searching by left side of the tree
 			while node.getHeight() > h:
 				node = node.getLeft()
 		return node
