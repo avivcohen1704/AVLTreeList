@@ -4,7 +4,7 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-## update time == 1930    21/4
+## update time == 1800 24/4
 
 """A class represnting a node in an AVL tree"""
 
@@ -728,7 +728,7 @@ class AVLTreeList(object):
 
 	def newRebalancing(self,node):
 
-		h = max(node.getLeft().getHeight(), node.getRight().getHeight()) + 1    # computes only for the node itself
+		h = max(node.getLeft().getHeight(), node.getRight().getHeight()) + 1    # computes fields only for the node itself
 		s = node.getLeft().getSize() + 1 + node.getRight().getSize()
 		oldH = node.getHeight()
 		node.setHeight(h)
@@ -742,8 +742,8 @@ class AVLTreeList(object):
 	def is_Rotation(self, node):
 
 		cnt = 0
-		while node.getHeight() != -1:
-			heightChanged = self.newRebalancing(node)
+		while node.getHeight() != -1:      				# checks for every node from the given one to the root, O(logn)
+			heightChanged = self.newRebalancing(node)		# indicates if the height is changed
 
 			bf = self.balancefactor(node)  ## check the balance factor of the node
 
