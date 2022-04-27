@@ -388,9 +388,7 @@ class AVLTreeList(object):
 		node.virtualInit()  									#final deletion of the node
 		self.virtualNode.virtualInit()  						# resets the tree's virtual node in \n
 																# case it had pointers somewhere
-
-		cnt += self.rebalancing(mntcNode)
-
+		
 		cnt += self.is_Rotation(mntcNode)
 
 
