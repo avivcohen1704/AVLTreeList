@@ -4,7 +4,6 @@
 #id2      - 208637033
 #name2    - Aviv Cohen
 
-## update time == 1800 24/4
 
 """A class represnting a node in an AVL tree"""
 
